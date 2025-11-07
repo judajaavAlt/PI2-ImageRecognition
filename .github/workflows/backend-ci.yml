@@ -31,7 +31,7 @@ jobs:
           pytest --maxfail=1 --disable-warnings -q
 
       - name: Build Docker image
-        run: docker build -t myorg/worker-backend:latest ./backend
+        run: docker build -t judajaav/worker-backend:latest ./backend
 
       - name: Push to Docker Hub
         run: |
