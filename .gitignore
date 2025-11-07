@@ -1,0 +1,63 @@
+# --- Global ---
+.DS_Store
+*.log
+.env
+.env.local
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+*.mypy_cache/
+*.pytest_cache/
+*.coverage
+.coverage.*
+.cache/
+.idea/
+.vscode/
+*.swp
+
+# --- Node / Frontend ---
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.*
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.turbo/
+frontend/.vite/
+frontend/.parcel-cache/
+
+# --- Python / Backend ---
+backend/.venv/
+backend/venv/
+backend/env/
+backend/.env
+backend/.pytest_cache/
+backend/__pycache__/
+backend/*.egg-info/
+backend/build/
+backend/dist/
+backend/.coverage
+backend/htmlcov/
+
+# --- Docker ---
+**/docker-compose.override.yml
+**/docker-compose.override.yaml
+**/Dockerfile.dev
+**/Dockerfile.local
+**/tmp/
+**/logs/
+
+# --- Tests / Reports ---
+reports/
+coverage/
+junit.xml
+test-results.xml
+
+# --- OS Specific ---
+Thumbs.db
+ehthumbs.db
+Icon?
