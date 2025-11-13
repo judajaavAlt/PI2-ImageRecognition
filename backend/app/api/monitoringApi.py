@@ -3,9 +3,9 @@ import time
 import os
 from fastapi.responses import JSONResponse
 from fastapi import APIRouter
-from services.monitoringService import check_database
-from services.monitoringService import check_recognition_service
-from services.monitoringService import check_speech_service
+from app.services.monitoringService import check_database
+from app.services.monitoringService import check_recognition_service
+from app.services.monitoringService import check_speech_service
 
 router = APIRouter()
 
