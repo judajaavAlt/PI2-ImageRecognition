@@ -1,4 +1,3 @@
-# app/services/speech_service.py
 import os
 import azure.cognitiveservices.speech as speechsdk
 from dotenv import load_dotenv
@@ -58,22 +57,34 @@ class SpeechService:
         # Guardamos temporalmente el audio en un archivo WAV
         #   (Azure SDK requiere un path)
         temp_filename = "temp_audio.wav"
-        with open(temp_filename, "wb") as f:
-            f.write(audio_bytes)
+        try:
+            with open(temp_filename, "wb") as f:
+                f.write(audio_bytes)
 
-        audio_input = speechsdk.AudioConfig(filename=temp_filename)
-        recognizer = speechsdk.SpeechRecognizer(
-            speech_config=self.cliente, audio_config=audio_input)
-        result = recognizer.recognize_once_async().get()
+            audio_input = speechsdk.AudioConfig(filename=temp_filename)
+            recognizer = speechsdk.SpeechRecognizer(
+                speech_config=self.cliente,
+                audio_config=audio_input
+            )
+            result = recognizer.recognize_once_async().get()
 
-        if result.reason == speechsdk.ResultReason.RecognizedSpeech:
-            return result.text
-        elif result.reason == speechsdk.ResultReason.NoMatch:
-            raise RuntimeError("No se pudo reconocer el habla en el audio.")
-        elif result.reason == speechsdk.ResultReason.Canceled:
-            cancellation_details = result.cancellation_details
-            raise RuntimeError(
-                f"Error en STT: {cancellation_details.reason},"
-                f"{cancellation_details.error_details}")
-        else:
-            raise RuntimeError("Error desconocido en la transcripción.")
+            if result.reason == speechsdk.ResultReason.RecognizedSpeech:
+                return result.text
+            elif result.reason == speechsdk.ResultReason.NoMatch:
+                raise RuntimeError(
+                    "No se pudo reconocer el habla en el audio.")
+            elif result.reason == speechsdk.ResultReason.Canceled:
+                raise RuntimeError(
+                    f"Error en STT:"
+                    f"{result.cancellation_details.error_details}")
+            else:
+                raise RuntimeError("Error desconocido en la transcripción.")
+        finally:
+            # Elimina el archivo temporal
+            if os.path.exists(temp_filename):
+                try:
+                    os.remove(temp_filename)
+                except PermissionError:
+                    # Windows puede mantener el archivo bloqueado brevemente;
+                    # lo ignoramos
+                    pass
