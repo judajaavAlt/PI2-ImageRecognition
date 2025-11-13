@@ -24,6 +24,13 @@ class SpeechService:
         # Configuración principal del servicio
         self.cliente = speechsdk.SpeechConfig(
             subscription=azure_key, region=region)
+
+        # Configuración global
+        # Voz masculina en español colombiano
+        # Idioma de reconocimiento
+        self.cliente.speech_synthesis_voice_name = "es-CO-GonzaloNeural"
+        self.cliente.speech_recognition_language = "es-CO"
+
         # Ajustamos el formato de salida a WAV
         self.cliente.set_speech_synthesis_output_format(
             speechsdk.SpeechSynthesisOutputFormat.Riff16Khz16BitMonoPcm
