@@ -26,7 +26,9 @@ def test_text_to_audio_devuelve_binarios(mock_speechsdk, service):
     mock_result.audio_data = mock_audio_data
 
     # Mock del sintetizador y su método
-    mock_speechsdk.SpeechSynthesizer.return_value.speak_text_async.return_value.get.return_value = mock_result
+    synth = mock_speechsdk.SpeechSynthesizer.return_value
+    speak_future = synth.speak_text_async.return_value
+    speak_future.get.return_value = mock_result
 
     output = service.text_to_audio("Hola mundo")
 
@@ -58,7 +60,8 @@ def test_audio_to_text_retorna_texto(mock_speechsdk, service):
     mock_result.text = "Hola mundo"
 
     # Simulamos la llamada asíncrona .recognize_once_async().get()
-    mock_speechsdk.SpeechRecognizer.return_value.recognize_once_async.return_value.get.return_value = mock_result
+    recognizer = mock_speechsdk.SpeechRecognizer.return_value
+    recognizer.recognize_once_async.return_value.get.return_value = mock_result
 
     fake_audio = io.BytesIO(b"FakeWavData")
     output = service.audio_to_text(fake_audio.read())
