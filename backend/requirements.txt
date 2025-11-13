@@ -1,4 +1,6 @@
 fastapi
 uvicorn
 pytest
+azure-cognitiveservices-speech
+python-dotenv
 httpx
