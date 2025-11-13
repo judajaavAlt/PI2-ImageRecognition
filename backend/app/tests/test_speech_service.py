@@ -5,8 +5,11 @@ from app.services.speechService import SpeechService
 
 
 @pytest.fixture
-def service():
-    """Instancia del servicio con valores mockeados."""
+def service(monkeypatch):
+    """Instancia del servicio con variables de entorno mockeadas."""
+    monkeypatch.setenv("AZURE_KEY", "fake_key")
+    monkeypatch.setenv(
+        "AZURE_URL", "https://fake-region.api.cognitive.microsoft.com/")
     return SpeechService()
 
 
@@ -80,3 +83,14 @@ def test_audio_to_text_lanza_excepcion_si_falla(mock_recognizer, service):
     fake_audio = io.BytesIO(b"FakeData")
     with pytest.raises(Exception):
         service.audio_to_text(fake_audio.read())
+
+
+# --- Prueba adicional: constructor sin variables de entorno ---
+
+def test_constructor_lanza_error_sin_variables(monkeypatch):
+    """Debe lanzar ValueError si faltan las variables AZURE_KEY o AZURE_URL."""
+    monkeypatch.delenv("AZURE_KEY", raising=False)
+    monkeypatch.delenv("AZURE_URL", raising=False)
+
+    with pytest.raises(ValueError):
+        SpeechService()
