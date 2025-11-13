@@ -7,62 +7,77 @@ load_dotenv()
 
 
 class SpeechService:
-    def __init__(self):
-        """Inicializa el cliente de Azure Speech
-        usando las variables de entorno."""
+    """Servicio estático para síntesis
+    y reconocimiento de voz con Azure Speech."""
+
+    # --- Atributo de clase (compartido por todos los métodos) ---
+    cliente = None
+
+    @classmethod
+    def configurar(cls):
+        """Inicializa el cliente de Azure Speech si no está configurado."""
+        if cls.cliente is not None:
+            return  # Ya está configurado
+
         azure_key = os.getenv("AZURE_KEY")
         azure_url = os.getenv("AZURE_URL")
 
         if not azure_key or not azure_url:
             raise ValueError(
                 "Las variables AZURE_KEY y AZURE_URL"
-                "deben estar definidas en el entorno.")
+                "deben estar definidas en el entorno."
+            )
 
         # Extrae la región del endpoint
         region = azure_url.split("//")[1].split(".")[0]
 
         # Configuración principal del servicio
-        self.cliente = speechsdk.SpeechConfig(
-            subscription=azure_key, region=region)
+        cls.cliente = speechsdk.SpeechConfig(
+            subscription=azure_key, region=region
+        )
 
-        # Configuración global
-        # Voz masculina en español colombiano
-        # Idioma de reconocimiento
-        self.cliente.speech_synthesis_voice_name = "es-CO-GonzaloNeural"
-        self.cliente.speech_recognition_language = "es-CO"
+        # Configuración global: voz y lenguaje
+        cls.cliente.speech_synthesis_voice_name = "es-CO-GonzaloNeural"
+        cls.cliente.speech_recognition_language = "es-CO"
 
         # Ajustamos el formato de salida a WAV
-        self.cliente.set_speech_synthesis_output_format(
+        cls.cliente.set_speech_synthesis_output_format(
             speechsdk.SpeechSynthesisOutputFormat.Riff16Khz16BitMonoPcm
         )
 
-    def text_to_audio(self, text: str) -> bytes:
-        """Convierte un texto en audio (WAV) y retorna los binarios."""
+    # --- Métodos de clase ---
+
+    @classmethod
+    def text_to_audio(cls, text: str) -> bytes:
+        """Convierte texto a audio (WAV) y retorna binarios."""
+        cls.configurar()
+
         if not text.strip():
             raise ValueError("El texto no puede estar vacío.")
 
-        # Creamos el sintetizador con salida en memoria
         synthesizer = speechsdk.SpeechSynthesizer(
-            speech_config=self.cliente, audio_config=None)
+            speech_config=cls.cliente, audio_config=None
+        )
         result = synthesizer.speak_text_async(text).get()
 
         if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
             return result.audio_data
         elif result.reason == speechsdk.ResultReason.Canceled:
-            cancellation_details = result.cancellation_details
             raise RuntimeError(
-                f"Error en TTS: {cancellation_details.reason},"
-                f"{cancellation_details.error_details}")
+                f"Error en TTS: {result.cancellation_details.reason}, "
+                f"{result.cancellation_details.error_details}"
+            )
         else:
             raise RuntimeError("Error desconocido en la síntesis de voz.")
 
-    def audio_to_text(self, audio_bytes: bytes) -> str:
-        """Transcribe un audio (binario WAV) a texto."""
+    @classmethod
+    def audio_to_text(cls, audio_bytes: bytes) -> str:
+        """Transcribe un audio (WAV) a texto."""
+        cls.configurar()
+
         if not audio_bytes:
             raise ValueError("El archivo de audio está vacío.")
 
-        # Guardamos temporalmente el audio en un archivo WAV
-        #   (Azure SDK requiere un path)
         temp_filename = "temp_audio.wav"
         try:
             with open(temp_filename, "wb") as f:
@@ -70,8 +85,7 @@ class SpeechService:
 
             audio_input = speechsdk.AudioConfig(filename=temp_filename)
             recognizer = speechsdk.SpeechRecognizer(
-                speech_config=self.cliente,
-                audio_config=audio_input
+                speech_config=cls.cliente, audio_config=audio_input
             )
             result = recognizer.recognize_once_async().get()
 
@@ -83,15 +97,13 @@ class SpeechService:
             elif result.reason == speechsdk.ResultReason.Canceled:
                 raise RuntimeError(
                     f"Error en STT:"
-                    f"{result.cancellation_details.error_details}")
+                    f"{result.cancellation_details.error_details}"
+                )
             else:
                 raise RuntimeError("Error desconocido en la transcripción.")
         finally:
-            # Elimina el archivo temporal
             if os.path.exists(temp_filename):
                 try:
                     os.remove(temp_filename)
                 except PermissionError:
-                    # Windows puede mantener el archivo bloqueado brevemente;
-                    # lo ignoramos
                     pass
