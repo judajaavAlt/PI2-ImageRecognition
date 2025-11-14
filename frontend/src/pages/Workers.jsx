@@ -55,7 +55,7 @@ function Workers() {
   return (
     <div className="workers-page">
       {showNotification && (
-        <div className={`notification-overlay ${isClosing ? 'closing' : ''}`}>
+        <div className={`notification-overlay ${isClosing ? "closing" : ""}`}>
           <Notification
             icon="🔔"
             title="Nuevo trabajador"
@@ -75,9 +75,7 @@ function Workers() {
           <button className="btn btn-primary" onClick={handleShowNotification}>
             Notificación
           </button>
-          <button className="btn btn-primary">
-            + Agregar trabajador
-          </button>
+          <button className="btn btn-primary">+ Agregar trabajador</button>
         </div>
 
         <div className="table-wrap">
