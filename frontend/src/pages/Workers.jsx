@@ -5,15 +5,28 @@ import "./workers.css";
 
 function Workers() {
   const [showNotification, setShowNotification] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     if (showNotification) {
       const timer = setTimeout(() => {
-        setShowNotification(false);
+        handleCloseNotification();
       }, 5000);
       return () => clearTimeout(timer);
     }
   }, [showNotification]);
+
+  const handleCloseNotification = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setShowNotification(false);
+      setIsClosing(false);
+    }, 300);
+  };
+
+  const handleShowNotification = () => {
+    setShowNotification(true);
+  };
 
   const data = useMemo(
     () =>
@@ -39,19 +52,15 @@ function Workers() {
     if (ok) alert("Trabajador eliminado (demo)");
   };
 
-  const handleAddWorker = () => {
-    setShowNotification(true);
-  };
-
   return (
     <div className="workers-page">
       {showNotification && (
-        <div className="notification-overlay">
+        <div className={`notification-overlay ${isClosing ? 'closing' : ''}`}>
           <Notification
             icon="🔔"
             title="Nuevo trabajador"
             content="Se ha iniciado el proceso para agregar un nuevo trabajador"
-            onClose={() => setShowNotification(false)}
+            onClose={handleCloseNotification}
           />
         </div>
       )}
@@ -63,7 +72,10 @@ function Workers() {
           <button className="tab active">Trabajadores</button>
           <button className="tab">Roles</button>
           <div className="spacer" />
-          <button className="btn btn-primary" onClick={handleAddWorker}>
+          <button className="btn btn-primary" onClick={handleShowNotification}>
+            Notificación
+          </button>
+          <button className="btn btn-primary">
             + Agregar trabajador
           </button>
         </div>
