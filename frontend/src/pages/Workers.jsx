@@ -65,12 +65,14 @@ function Workers() {
             Roles
           </button>
           <div className="spacer" />
-          <button
-            className="btn btn-primary"
-            onClick={() => setShowCreateModal(true)}
-          >
-            + Agregar trabajador
-          </button>
+          {activeTab === "workers" && (
+            <button
+              className="btn btn-primary"
+              onClick={() => setShowCreateModal(true)}
+            >
+              + Agregar trabajador
+            </button>
+          )}
         </div>
 
         <div className="table-wrap">
