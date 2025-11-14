@@ -6,6 +6,8 @@ import "./workers.css";
 function Workers() {
   const [activeTab, setActiveTab] = useState("workers");
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedWorker, setSelectedWorker] = useState(null);
 
   const data = useMemo(
     () =>
@@ -19,9 +21,8 @@ function Workers() {
   );
 
   const handleEdit = (row) => {
-    // Placeholder: replace with real navigation or modal
-    // eslint-disable-next-line no-alert
-    alert(`Editar trabajador #${row.id}`);
+    setSelectedWorker(row);
+    setShowEditModal(true);
   };
 
   const handleDelete = (row) => {
@@ -36,6 +37,13 @@ function Workers() {
     alert(`Trabajador creado: ${formData.name}`);
     console.log("Datos del nuevo trabajador:", formData);
     // Aquí iría la llamada a la API para crear el trabajador
+  };
+
+  const handleUpdateWorker = (formData) => {
+    // eslint-disable-next-line no-alert
+    alert(`Trabajador actualizado: ${formData.name}`);
+    console.log("Datos actualizados del trabajador:", formData);
+    // Aquí iría la llamada a la API para actualizar el trabajador
   };
 
   return (
@@ -104,6 +112,17 @@ function Workers() {
         onClose={() => setShowCreateModal(false)}
         mode="create"
         onSubmit={handleCreateWorker}
+      />
+
+      <WorkerModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedWorker(null);
+        }}
+        mode="edit"
+        workerData={selectedWorker}
+        onSubmit={handleUpdateWorker}
       />
     </div>
   );
