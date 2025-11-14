@@ -1,0 +1,112 @@
+.workers-page {
+  padding: 20px 64px;
+  background: #ffffff; /* página a ancho completo con fondo blanco */
+  min-height: 100vh;
+  box-sizing: border-box;
+  color: #000; /* texto negro por requerimiento */
+  /* Fijar ancho al viewport sin overflow */
+  width: 100%;
+  max-width: 100vw;
+  margin: 0;
+  text-align: left;
+  overflow-x: hidden;
+}
+
+.panel {
+  background: transparent; /* sin tarjeta/cuadro */
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+}
+
+.panel-title {
+  font-weight: 600;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tabs-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #1e88e5;
+  color: #fff;
+  padding: 8px;
+  border-radius: 0; /* barra a lo ancho, sin bordes redondeados */
+}
+
+.tab {
+  background: transparent;
+  border: none;
+  color: #dbeafe;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.tab.active {
+  background: #1565c0;
+  color: #fff;
+}
+.spacer {
+  flex: 1;
+}
+
+.btn {
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.btn-primary {
+  background: #22c55e;
+  color: white;
+}
+.btn-edit {
+  background: #e2e8f0;
+}
+.btn-delete {
+  background: #ef4444;
+  color: white;
+}
+
+.table-wrap {
+  padding: 0;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 0;
+  overflow: hidden;
+  table-layout: fixed;
+}
+.table thead th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.9rem;
+  background: #eaf2fb;
+  color: #000; /* títulos negros */
+  padding: 10px 12px;
+  border-bottom: 1px solid #eef2f7;
+}
+.table tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eef2f7;
+  color: #000; /* info de trabajadores en negro */
+}
+.table tbody tr:nth-child(even) td {
+  background: #f8fafc;
+}
+
+td.w-num {
+  width: 80px;
+  color: #0f172a;
+}
+td.actions {
+  width: 200px;
+  display: flex;
+  gap: 8px;
+}
