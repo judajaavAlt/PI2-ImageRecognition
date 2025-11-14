@@ -1,8 +1,20 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import WorkerItem from "../components/WorkerItem";
+import Notification from "../components/Notification";
 import "./workers.css";
 
 function Workers() {
+  const [showNotification, setShowNotification] = useState(false);
+
+  useEffect(() => {
+    if (showNotification) {
+      const timer = setTimeout(() => {
+        setShowNotification(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showNotification]);
+
   const data = useMemo(
     () =>
       Array.from({ length: 9 }).map((_, i) => ({
@@ -27,8 +39,23 @@ function Workers() {
     if (ok) alert("Trabajador eliminado (demo)");
   };
 
+  const handleAddWorker = () => {
+    setShowNotification(true);
+  };
+
   return (
     <div className="workers-page">
+      {showNotification && (
+        <div className="notification-overlay">
+          <Notification
+            icon="🔔"
+            title="Nuevo trabajador"
+            content="Se ha iniciado el proceso para agregar un nuevo trabajador"
+            onClose={() => setShowNotification(false)}
+          />
+        </div>
+      )}
+
       <div className="panel">
         <div className="panel-title">Panel de Gestión de Trabajadores</div>
 
@@ -36,7 +63,9 @@ function Workers() {
           <button className="tab active">Trabajadores</button>
           <button className="tab">Roles</button>
           <div className="spacer" />
-          <button className="btn btn-primary">+ Agregar trabajador</button>
+          <button className="btn btn-primary" onClick={handleAddWorker}>
+            + Agregar trabajador
+          </button>
         </div>
 
         <div className="table-wrap">
