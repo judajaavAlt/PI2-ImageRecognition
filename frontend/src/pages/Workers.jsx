@@ -1,9 +1,11 @@
 import React, { useMemo, useState } from "react";
 import WorkerItem from "../components/WorkerItem";
+import WorkerModal from "../components/WorkerModal";
 import "./workers.css";
 
 function Workers() {
   const [activeTab, setActiveTab] = useState("workers");
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const data = useMemo(
     () =>
@@ -29,6 +31,13 @@ function Workers() {
     if (ok) alert("Trabajador eliminado (demo)");
   };
 
+  const handleCreateWorker = (formData) => {
+    // eslint-disable-next-line no-alert
+    alert(`Trabajador creado: ${formData.name}`);
+    console.log("Datos del nuevo trabajador:", formData);
+    // Aquí iría la llamada a la API para crear el trabajador
+  };
+
   return (
     <div className="workers-page">
       <div className="panel">
@@ -48,7 +57,12 @@ function Workers() {
             Roles
           </button>
           <div className="spacer" />
-          <button className="btn btn-primary">+ Agregar trabajador</button>
+          <button
+            className="btn btn-primary"
+            onClick={() => setShowCreateModal(true)}
+          >
+            + Agregar trabajador
+          </button>
         </div>
 
         <div className="table-wrap">
@@ -84,6 +98,13 @@ function Workers() {
           )}
         </div>
       </div>
+
+      <WorkerModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        mode="create"
+        onSubmit={handleCreateWorker}
+      />
     </div>
   );
 }
