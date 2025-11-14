@@ -101,12 +101,20 @@
   background: #f8fafc;
 }
 
+th.w-num,
 td.w-num {
   width: 80px;
   color: #0f172a;
 }
+th.actions,
 td.actions {
   width: 200px;
+}
+td.actions {
+  padding: 10px 12px;
+}
+td.actions > div {
   display: flex;
   gap: 8px;
+  align-items: center;
 }
