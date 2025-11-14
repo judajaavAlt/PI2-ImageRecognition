@@ -151,3 +151,15 @@ td.actions > div {
     opacity: 0;
   }
 }
+
+.construction-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  color: #64748b;
+  font-size: 1.5rem;
+  background: #f8fafc;
+  margin: 16px;
+  border-radius: 8px;
+}
