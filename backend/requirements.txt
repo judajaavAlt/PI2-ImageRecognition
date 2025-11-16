@@ -4,3 +4,5 @@ pytest
 azure-cognitiveservices-speech
 python-dotenv
 httpx
+pytest-mock
+supabase
