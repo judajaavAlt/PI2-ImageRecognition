@@ -2,3 +2,6 @@ fastapi
 uvicorn
 pytest
 pytest-asyncio
+azure-cognitiveservices-speech
+python-dotenv
+httpx

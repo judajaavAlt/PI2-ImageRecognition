@@ -2,7 +2,7 @@ from core.CORS import setup_cors
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 import os
-from api import monitoringApi, workerManagerApi
+from api import monitoringApi, workerManagerApi, adminApi
 # ------------------------------------------------------------------------------
 # Application Metadata
 # ------------------------------------------------------------------------------
@@ -39,6 +39,7 @@ async def root():
 app.include_router(monitoringApi.router)
 app.include_router(workerManagerApi.router)
 
+app.include_router(adminApi.router)
 
 
 # ------------------------------------------------------------------------------
