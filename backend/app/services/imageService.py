@@ -24,8 +24,9 @@ class ImageService:
     # ----------------------------------------------------------------------
 
     @classmethod
-    def compare_images(
-        cls, img1_bytes: bytes, img2_bytes: bytes, *, tolerance: float = 0.75
+    def check_face(
+        cls, compared_image: bytes, worker_image: bytes, *,
+        tolerance: float = 0.75
             ) -> bool:
         """
         Compara dos imágenes y retorna True si son suficientemente similares.
@@ -33,8 +34,8 @@ class ImageService:
 
         tolerance: Valor entre 0 y 1, donde 1 es igualdad absoluta.
         """
-        img1 = cls._bytes_to_image(img1_bytes)
-        img2 = cls._bytes_to_image(img2_bytes)
+        img1 = cls._bytes_to_image(compared_image)
+        img2 = cls._bytes_to_image(worker_image)
 
         # Redimensionamos para poder comparar
         img2_resized = cv2.resize(img2, (img1.shape[1], img1.shape[0]))
