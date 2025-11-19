@@ -4,3 +4,6 @@ pytest
 azure-cognitiveservices-speech
 python-dotenv
 httpx
+opencv-python
+numpy
+scikit-image
