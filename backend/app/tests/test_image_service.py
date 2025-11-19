@@ -63,7 +63,7 @@ def test_check_shirt_color_true_si_coincide():
     img = np.full((200, 200, 3), (0, 0, 255), dtype=np.uint8)  # BGR → rojo
     img_bytes = img_to_bytes(img)
 
-    output = ImageService.check_shirt_color(img_bytes, "#FF0000")
+    output = ImageService.check_role(img_bytes, "#FF0000")
 
     assert isinstance(output, bool)
     assert output is True
@@ -76,7 +76,7 @@ def test_check_shirt_color_false_si_color_no_coincide():
     img = np.full((200, 200, 3), (255, 0, 0), dtype=np.uint8)  # BGR → azul
     img_bytes = img_to_bytes(img)
 
-    output = ImageService.check_shirt_color(img_bytes, "#FF0000")  # color rojo
+    output = ImageService.check_role(img_bytes, "#FF0000")  # color rojo
 
     assert isinstance(output, bool)
     assert output is False
@@ -85,10 +85,10 @@ def test_check_shirt_color_false_si_color_no_coincide():
 def test_check_shirt_color_lanza_error_si_imagen_vacia():
     """Debe lanzar ValueError si la imagen está vacía."""
     with pytest.raises(ValueError):
-        ImageService.check_shirt_color(b"", "#FFFFFF")
+        ImageService.check_role(b"", "#FFFFFF")
 
 
 def test_check_shirt_color_lanza_error_si_bytes_invalidos():
     """Debe lanzar ValueError si los bytes no corresponden a una imagen."""
     with pytest.raises(ValueError):
-        ImageService.check_shirt_color(b"NO_ES_IMAGEN", "#00FF00")
+        ImageService.check_role(b"NO_ES_IMAGEN", "#00FF00")

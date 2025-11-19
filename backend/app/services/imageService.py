@@ -56,7 +56,7 @@ class ImageService:
     # ----------------------------------------------------------------------
 
     @classmethod
-    def check_shirt_color(
+    def check_role(
         cls, compared_image: bytes, hex_color: str, *,
         tolerance: int = 25,
         match_threshold: float = 0.15
