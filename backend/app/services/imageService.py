@@ -50,3 +50,71 @@ class ImageService:
         score, _ = ssim(img1_gray, img2_gray, full=True)
 
         return bool(score >= tolerance)
+
+    # ----------------------------------------------------------------------
+    # MÉTODO 2: Detectar si el color de la camiseta coincide con un color hex
+    # ----------------------------------------------------------------------
+
+    @classmethod
+    def check_shirt_color(
+        cls, compared_image: bytes, hex_color: str, *,
+        tolerance: int = 25,
+        match_threshold: float = 0.15
+    ) -> bool:
+        """
+        Determina si la camiseta de la persona
+        coincide con el color hexadecimal dado.
+
+        - hex_color: formato "#RRGGBB" o "RRGGBB"
+        - tolerance: margen permitido para H, S y V
+        - match_threshold: % mínimo de píxeles que deben coincidir (0.0–1.0)
+        """
+
+        img = cls._bytes_to_image(compared_image)
+
+        h, w, _ = img.shape
+
+        # Tomamos el tercio inferior-central
+        y1 = int(h * 0.55)
+        y2 = int(h * 0.90)
+        x1 = int(w * 0.25)
+        x2 = int(w * 0.75)
+
+        shirt_region = img[y1:y2, x1:x2]
+
+        # Convertir ROI a HSV
+        hsv_img = cv2.cvtColor(shirt_region, cv2.COLOR_BGR2HSV)
+
+        # Convertir hex → BGR
+        hex_color = hex_color.lstrip("#")
+
+        # Convertir color a HSV
+        hex_color = hex_color.lstrip('#')
+        rgb = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+        bgr = rgb[::-1]
+
+        target = np.uint8([[bgr]])
+        hsv_target = cv2.cvtColor(target, cv2.COLOR_BGR2HSV)[0][0]
+
+        h, s, v = [int(x) for x in hsv_target]
+
+        # Rango mínimo y máximo según tolerancia
+        lower = np.array([
+            max(h - tolerance, 0),
+            max(s - tolerance, 0),
+            max(v - tolerance, 0)
+        ], dtype=np.uint8)
+
+        upper = np.array([
+            min(h + tolerance, 255),
+            min(s + tolerance, 255),
+            min(v + tolerance, 255)
+        ], dtype=np.uint8)
+
+        # Crear máscara
+        mask = cv2.inRange(hsv_img, lower, upper)
+
+        # Calcular porcentaje de coincidencia
+        match_ratio = np.count_nonzero(mask) / mask.size
+
+        return bool(match_ratio >= match_threshold)
