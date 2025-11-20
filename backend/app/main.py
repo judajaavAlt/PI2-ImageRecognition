@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()  # Carga variables de entorno desde .env si está presente 
 from app.core.CORS import setup_cors
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
