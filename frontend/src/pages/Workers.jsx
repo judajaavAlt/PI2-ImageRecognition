@@ -1,6 +1,8 @@
 import React, { useMemo, useState } from "react";
 import WorkerItem from "../components/WorkerItem";
 import WorkerModal from "../components/WorkerModal";
+import RoleItem from "../components/RoleItem";
+import RoleModal from "../components/RoleModal";
 import "./workers.css";
 
 function Workers() {
@@ -8,6 +10,9 @@ function Workers() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedWorker, setSelectedWorker] = useState(null);
+  const [showCreateRoleModal, setShowCreateRoleModal] = useState(false);
+  const [showEditRoleModal, setShowEditRoleModal] = useState(false);
+  const [selectedRole, setSelectedRole] = useState(null);
 
   const data = useMemo(
     () =>
@@ -17,6 +22,17 @@ function Workers() {
         documentId: "1.234.523.432",
         role: "Manufacturero",
       })),
+    []
+  );
+
+  const rolesData = useMemo(
+    () => [
+      { id: 1, name: "Manufacturero", color: "#fcba03" },
+      { id: 2, name: "Obrero", color: "#3d7462" },
+      { id: 3, name: "Operario de producción", color: "#e85a4f" },
+      { id: 4, name: "Inspector de calidad", color: "#2b8bc3" },
+      { id: 5, name: "Mantenimiento", color: "#d2f1d0" },
+    ],
     []
   );
 
@@ -46,6 +62,31 @@ function Workers() {
     // Aquí iría la llamada a la API para actualizar el trabajador
   };
 
+  const handleEditRole = (role) => {
+    setSelectedRole(role);
+    setShowEditRoleModal(true);
+  };
+
+  const handleDeleteRole = (role) => {
+    // eslint-disable-next-line no-alert
+    const ok = confirm(`¿Borrar rol ${role.name}?`);
+    if (ok) alert("Rol eliminado (demo)");
+  };
+
+  const handleCreateRole = (formData) => {
+    // eslint-disable-next-line no-alert
+    alert(`Rol creado: ${formData.name}`);
+    console.log("Datos del nuevo rol:", formData);
+    // Aquí iría la llamada a la API para crear el rol
+  };
+
+  const handleUpdateRole = (formData) => {
+    // eslint-disable-next-line no-alert
+    alert(`Rol actualizado: ${formData.name}`);
+    console.log("Datos actualizados del rol:", formData);
+    // Aquí iría la llamada a la API para actualizar el rol
+  };
+
   return (
     <div className="workers-page">
       <div className="panel">
@@ -71,6 +112,14 @@ function Workers() {
               onClick={() => setShowCreateModal(true)}
             >
               + Agregar trabajador
+            </button>
+          )}
+          {activeTab === "roles" && (
+            <button
+              className="btn btn-primary"
+              onClick={() => setShowCreateRoleModal(true)}
+            >
+              + Agregar Rol
             </button>
           )}
         </div>
@@ -102,9 +151,28 @@ function Workers() {
               </tbody>
             </table>
           ) : (
-            <div className="construction-message">
-              <h2>🚧 En construcción</h2>
-            </div>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nombre del Rol</th>
+                  <th>Color representativo</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rolesData.map((role) => (
+                  <RoleItem
+                    key={role.id}
+                    id={role.id}
+                    name={role.name}
+                    color={role.color}
+                    onEdit={() => handleEditRole(role)}
+                    onDelete={() => handleDeleteRole(role)}
+                  />
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
       </div>
@@ -125,6 +193,24 @@ function Workers() {
         mode="edit"
         workerData={selectedWorker}
         onSubmit={handleUpdateWorker}
+      />
+
+      <RoleModal
+        isOpen={showCreateRoleModal}
+        onClose={() => setShowCreateRoleModal(false)}
+        mode="create"
+        onSubmit={handleCreateRole}
+      />
+
+      <RoleModal
+        isOpen={showEditRoleModal}
+        onClose={() => {
+          setShowEditRoleModal(false);
+          setSelectedRole(null);
+        }}
+        mode="edit"
+        roleData={selectedRole}
+        onSubmit={handleUpdateRole}
       />
     </div>
   );
