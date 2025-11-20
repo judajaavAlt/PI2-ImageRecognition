@@ -20,6 +20,16 @@ class Worker(BaseModel):
     photo: str
 
 
+class verification(BaseModel):
+    cc: int
+    photo: str
+
+
+class result(BaseModel):
+    match: bool
+    message: str
+
+
 @router.post(
             "/",
             response_model=Worker,
@@ -65,3 +75,12 @@ async def update_worker(id: int, data: WorkerCreate):
             status_code=status.HTTP_200_OK)
 async def delete_worker(id: int):
     return WorkerManager.delete(id)
+
+
+@router.post(
+            "/verify",
+            response_model=result,
+            summary="verificar un trabajador segun su c.c. y foto",
+            status_code=status.HTTP_200_OK)
+async def verify_worker(data: verification):
+    return {"match": True, "message": ""}
