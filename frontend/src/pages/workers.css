@@ -85,10 +85,10 @@
   background: white;
   border-radius: 0;
   overflow: hidden;
-  table-layout: fixed;
+  table-layout: auto;
 }
 .table thead th {
-  text-align: left;
+  text-align: center;
   font-weight: 600;
   font-size: 0.9rem;
   background: #eaf2fb;
@@ -100,6 +100,7 @@
   padding: 10px 12px;
   border-bottom: 1px solid #eef2f7;
   color: #000; /* info de trabajadores en negro */
+  text-align: center;
 }
 .table tbody tr:nth-child(even) td {
   background: #f8fafc;
@@ -107,12 +108,18 @@
 
 th.w-num,
 td.w-num {
-  width: 80px;
+  width: auto;
   color: #0f172a;
+  text-align: left !important;
+  white-space: nowrap;
 }
 th.actions,
 td.actions {
-  width: 200px;
+  width: 230px;
+  min-width: 230px;
+  max-width: 230px;
+  text-align: center !important;
+  white-space: nowrap;
 }
 td.actions {
   padding: 10px 12px;
@@ -121,6 +128,7 @@ td.actions > div {
   display: flex;
   gap: 8px;
   align-items: center;
+  justify-content: center;
 }
 
 .notification-overlay {
