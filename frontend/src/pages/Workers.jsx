@@ -3,6 +3,7 @@ import WorkerItem from "../components/WorkerItem";
 import WorkerModal from "../components/WorkerModal";
 import RoleItem from "../components/RoleItem";
 import RoleModal from "../components/RoleModal";
+import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 import "./workers.css";
 
 function Workers() {
@@ -13,6 +14,10 @@ function Workers() {
   const [showCreateRoleModal, setShowCreateRoleModal] = useState(false);
   const [showEditRoleModal, setShowEditRoleModal] = useState(false);
   const [selectedRole, setSelectedRole] = useState(null);
+  const [showDeleteWorkerModal, setShowDeleteWorkerModal] = useState(false);
+  const [workerToDelete, setWorkerToDelete] = useState(null);
+  const [showDeleteRoleModal, setShowDeleteRoleModal] = useState(false);
+  const [roleToDelete, setRoleToDelete] = useState(null);
 
   const data = useMemo(
     () =>
@@ -42,10 +47,15 @@ function Workers() {
   };
 
   const handleDelete = (row) => {
-    // Placeholder: replace con confirm real + llamada API
+    setWorkerToDelete(row);
+    setShowDeleteWorkerModal(true);
+  };
+
+  const confirmDeleteWorker = () => {
     // eslint-disable-next-line no-alert
-    const ok = confirm(`¿Borrar trabajador #${row.id}?`);
-    if (ok) alert("Trabajador eliminado (demo)");
+    alert(`Trabajador eliminado: ${workerToDelete.name}`);
+    console.log("Trabajador eliminado:", workerToDelete);
+    // Aquí iría la llamada a la API para eliminar el trabajador
   };
 
   const handleCreateWorker = (formData) => {
@@ -68,9 +78,15 @@ function Workers() {
   };
 
   const handleDeleteRole = (role) => {
+    setRoleToDelete(role);
+    setShowDeleteRoleModal(true);
+  };
+
+  const confirmDeleteRole = () => {
     // eslint-disable-next-line no-alert
-    const ok = confirm(`¿Borrar rol ${role.name}?`);
-    if (ok) alert("Rol eliminado (demo)");
+    alert(`Rol eliminado: ${roleToDelete.name}`);
+    console.log("Rol eliminado:", roleToDelete);
+    // Aquí iría la llamada a la API para eliminar el rol
   };
 
   const handleCreateRole = (formData) => {
@@ -211,6 +227,28 @@ function Workers() {
         mode="edit"
         roleData={selectedRole}
         onSubmit={handleUpdateRole}
+      />
+
+      <ConfirmDeleteModal
+        isOpen={showDeleteWorkerModal}
+        onClose={() => {
+          setShowDeleteWorkerModal(false);
+          setWorkerToDelete(null);
+        }}
+        onConfirm={confirmDeleteWorker}
+        itemName={workerToDelete?.name || ""}
+        itemType="trabajador"
+      />
+
+      <ConfirmDeleteModal
+        isOpen={showDeleteRoleModal}
+        onClose={() => {
+          setShowDeleteRoleModal(false);
+          setRoleToDelete(null);
+        }}
+        onConfirm={confirmDeleteRole}
+        itemName={roleToDelete?.name || ""}
+        itemType="rol"
       />
     </div>
   );
