@@ -20,9 +20,13 @@
 }
 
 .panel-title {
-  font-weight: 600;
+  font-weight: 700;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
   padding: 16px 20px;
-  border-bottom: 1px solid #e5e7eb;
+  margin: 0 0 16px 0;
+  box-sizing: border-box; /* asegura mismo ancho visual que la tabla */
 }
 
 .tabs-bar {
