@@ -165,34 +165,35 @@ function Workers() {
             className={`tab ${activeTab === "workers" ? "active" : ""}`}
             onClick={() => setActiveTab("workers")}
           >
-            Trabajadores
+            👥 Trabajadores
           </button>
           <button
             className={`tab ${activeTab === "roles" ? "active" : ""}`}
             onClick={() => setActiveTab("roles")}
           >
-            Roles
+            👤 Roles
           </button>
-          <div className="spacer" />
-          {activeTab === "workers" && (
-            <button
-              className="btn btn-primary"
-              onClick={() => setShowCreateModal(true)}
-            >
-              + Agregar trabajador
-            </button>
-          )}
-          {activeTab === "roles" && (
-            <button
-              className="btn btn-primary"
-              onClick={() => setShowCreateRoleModal(true)}
-            >
-              + Agregar Rol
-            </button>
-          )}
         </div>
 
         <div className="table-wrap">
+          <div className="tab-content-header">
+            {activeTab === "workers" && (
+              <button
+                className="btn btn-primary"
+                onClick={() => setShowCreateModal(true)}
+              >
+                👤+ Agregar trabajador
+              </button>
+            )}
+            {activeTab === "roles" && (
+              <button
+                className="btn btn-primary"
+                onClick={() => setShowCreateRoleModal(true)}
+              >
+                + Agregar Rol
+              </button>
+            )}
+          </div>
           {activeTab === "workers" ? (
             <table className="table">
               <thead>

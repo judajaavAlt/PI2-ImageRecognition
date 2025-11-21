@@ -1,19 +1,20 @@
 .workers-page {
-  padding: 20px 64px;
-  background: #ffffff; /* página a ancho completo con fondo blanco */
+  padding: 24px 64px;
+  background: #f8fafc; /* Fondo gris muy claro */
   min-height: 100vh;
   box-sizing: border-box;
-  color: #000; /* texto negro por requerimiento */
-  /* Fijar ancho al viewport sin overflow */
+  color: #1e293b;
   width: 100%;
   max-width: 100vw;
   margin: 0;
   text-align: left;
   overflow-x: hidden;
+  font-family: "Inter", "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
 }
 
 .panel {
-  background: transparent; /* sin tarjeta/cuadro */
+  background: transparent;
   border-radius: 0;
   border: none;
   box-shadow: none;
@@ -21,89 +22,148 @@
 
 .panel-title {
   font-weight: 700;
+  font-size: 1.5rem;
   background: #ffffff;
-  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
   border-radius: 12px;
-  padding: 16px 20px;
-  margin: 0 0 16px 0;
-  box-sizing: border-box; /* asegura mismo ancho visual que la tabla */
+  padding: 20px 24px;
+  margin: 0 0 24px 0;
+  box-sizing: border-box;
+  color: #0f172a;
 }
 
 .tabs-bar {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #1e88e5;
-  color: #fff;
-  padding: 8px;
-  border-radius: 0; /* barra a lo ancho, sin bordes redondeados */
+  align-items: flex-end;
+  gap: 0;
+  background: transparent;
+  padding: 0;
+  margin-bottom: -1px;
+  position: relative;
 }
 
 .tab {
-  background: transparent;
+  padding: 12px 24px;
   border: none;
-  color: #dbeafe;
-  padding: 8px 16px;
-  border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
+  font-size: 0.95rem;
+  position: relative;
+  transition: all 0.2s ease;
+  border-radius: 8px 8px 0 0;
 }
+
+.tab:not(.active) {
+  background: #2b8bc3;
+  color: #ffffff;
+  font-style: italic;
+}
+
 .tab.active {
-  background: #1565c0;
-  color: #fff;
+  background: #ffffff;
+  color: #2b8bc3;
+  border: 1px solid #e2e8f0;
+  border-bottom: none;
+  z-index: 2;
 }
+
 .spacer {
   flex: 1;
 }
 
 .btn {
   border: none;
-  padding: 6px 10px;
-  border-radius: 6px;
+  padding: 10px 16px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
+
 .btn-primary {
-  background: #22c55e;
-  color: white;
-}
-.btn-edit {
-  background: #e2e8f0;
-}
-.btn-delete {
-  background: #ef4444;
+  background: #2b8bc3;
   color: white;
 }
 
+.btn-primary:hover {
+  background: #1d4ed8;
+}
+
+.btn-edit {
+  background: #E6F6EF;
+  color: #3d7462;
+  border: 1px solid #3d7462;
+}
+
+.btn-edit:hover {
+  background: #d1fae5;
+}
+
+.btn-delete {
+  background: #f87171;
+  color: white;
+}
+
+.btn-delete:hover {
+  background: #ef4444;
+}
+
 .table-wrap {
-  padding: 0;
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0 12px 12px 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.tab-content-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 0 20px 0;
+  background: transparent;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
   background: white;
-  border-radius: 0;
-  overflow: hidden;
   table-layout: auto;
+  border-radius: 12px;
+  overflow: hidden;
 }
+
 .table thead th {
   text-align: center;
   font-weight: 600;
-  font-size: 0.9rem;
-  background: #eaf2fb;
-  color: #000; /* títulos negros */
-  padding: 10px 12px;
-  border-bottom: 1px solid #eef2f7;
+  font-size: 0.85rem;
+  background: #f0fdfa;
+  color: #0f766e;
+  padding: 14px 16px;
+  border-bottom: 2px solid #99f6e4;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
+
 .table tbody td {
-  padding: 10px 12px;
-  border-bottom: 1px solid #eef2f7;
-  color: #000; /* info de trabajadores en negro */
+  padding: 6px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
   text-align: center;
+  background: #ffffff;
 }
+
 .table tbody tr:nth-child(even) td {
   background: #f8fafc;
+}
+
+.table tbody tr:hover td {
+  background: #e2e8f0;
 }
 
 th.w-num,
