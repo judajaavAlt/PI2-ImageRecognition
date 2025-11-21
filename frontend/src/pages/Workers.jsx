@@ -1,9 +1,10 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import WorkerItem from "../components/WorkerItem";
 import WorkerModal from "../components/WorkerModal";
 import RoleItem from "../components/RoleItem";
 import RoleModal from "../components/RoleModal";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
+import Notification from "../components/Notification";
 import "./workers.css";
 
 function Workers() {
@@ -18,6 +19,29 @@ function Workers() {
   const [workerToDelete, setWorkerToDelete] = useState(null);
   const [showDeleteRoleModal, setShowDeleteRoleModal] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState(null);
+  const [notification, setNotification] = useState(null);
+  const [isClosingNotification, setIsClosingNotification] = useState(false);
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        handleCloseNotification();
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
+  const handleCloseNotification = () => {
+    setIsClosingNotification(true);
+    setTimeout(() => {
+      setNotification(null);
+      setIsClosingNotification(false);
+    }, 300);
+  };
+
+  const showNotification = (icon, title, content, type = "info") => {
+    setNotification({ icon, title, content, type });
+  };
 
   const data = useMemo(
     () =>
@@ -52,23 +76,35 @@ function Workers() {
   };
 
   const confirmDeleteWorker = () => {
-    // eslint-disable-next-line no-alert
-    alert(`Trabajador eliminado: ${workerToDelete.name}`);
     console.log("Trabajador eliminado:", workerToDelete);
+    showNotification(
+      "🗑️",
+      "Trabajador eliminado",
+      `El trabajador ${workerToDelete.name} ha sido eliminado del registro exitosamente`,
+      "error"
+    );
     // Aquí iría la llamada a la API para eliminar el trabajador
   };
 
   const handleCreateWorker = (formData) => {
-    // eslint-disable-next-line no-alert
-    alert(`Trabajador creado: ${formData.name}`);
     console.log("Datos del nuevo trabajador:", formData);
+    showNotification(
+      "✅",
+      "Trabajador creado",
+      `El trabajador ${formData.name} ha sido agregado exitosamente`,
+      "success"
+    );
     // Aquí iría la llamada a la API para crear el trabajador
   };
 
   const handleUpdateWorker = (formData) => {
-    // eslint-disable-next-line no-alert
-    alert(`Trabajador actualizado: ${formData.name}`);
     console.log("Datos actualizados del trabajador:", formData);
+    showNotification(
+      "✏️",
+      "Trabajador actualizado",
+      `Los datos de ${formData.name} han sido actualizados exitosamente`,
+      "success"
+    );
     // Aquí iría la llamada a la API para actualizar el trabajador
   };
 
@@ -105,6 +141,22 @@ function Workers() {
 
   return (
     <div className="workers-page">
+      {notification && (
+        <div
+          className={`notification-overlay ${
+            isClosingNotification ? "closing" : ""
+          }`}
+        >
+          <Notification
+            className={notification.type}
+            icon={notification.icon}
+            title={notification.title}
+            content={notification.content}
+            onClose={handleCloseNotification}
+          />
+        </div>
+      )}
+
       <div className="panel">
         <div className="panel-title">Panel de Gestión de Trabajadores</div>
 

@@ -1,6 +1,6 @@
 .notification {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
   background: #e7f3ff;
   border-left: 4px solid #1e88e5;
@@ -67,7 +67,7 @@
 
 /* Variantes de color */
 .notification.success {
-  background: #f0fdf4;
+  background: #D2F1D0;
   border-left-color: #22c55e;
 }
 
@@ -76,8 +76,16 @@
   border-left-color: #f59e0b;
 }
 
+.notification.error .notification-title {
+  color: #ffffff; 
+}
+
+.notification.error .notification-text {
+  color: #fee2e2; 
+}
+
 .notification.error {
-  background: #fef2f2;
+  background: #E85A4F;
   border-left-color: #ef4444;
 }
 
