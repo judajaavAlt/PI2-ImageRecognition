@@ -1,10 +1,8 @@
-from dotenv import load_dotenv
-load_dotenv()  # Carga variables de entorno desde .env si está presente 
-from app.core.CORS import setup_cors
+from core.CORS import setup_cors
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 import os
-from app.api import monitoringApi, adminApi
+from api import monitoringApi, adminApi, RoleApi, WorkerApi
 
 # ------------------------------------------------------------------------------
 # Application Metadata
@@ -41,6 +39,8 @@ async def root():
 
 app.include_router(monitoringApi.router)
 app.include_router(adminApi.router)
+app.include_router(RoleApi.router)
+app.include_router(WorkerApi.router)
 
 
 # ------------------------------------------------------------------------------
