@@ -62,3 +62,7 @@ test-results.xml
 Thumbs.db
 ehthumbs.db
 Icon?
+
+# Ignore role and worker data
+backend/app/roles.json
+backend/app/workers.json
