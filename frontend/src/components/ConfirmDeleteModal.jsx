@@ -11,7 +11,7 @@ function ConfirmDeleteModal({
   const [confirmName, setConfirmName] = useState("");
 
   const handleConfirm = () => {
-    if (confirmName.toLowerCase() === itemName.toLowerCase()) {
+    if (confirmName === itemName) {
       onConfirm();
       handleClose();
     }
@@ -22,8 +22,7 @@ function ConfirmDeleteModal({
     onClose();
   };
 
-  const isConfirmDisabled =
-    confirmName.toLowerCase() !== itemName.toLowerCase();
+  const isConfirmDisabled = confirmName !== itemName;
 
   if (!isOpen) return null;
 
