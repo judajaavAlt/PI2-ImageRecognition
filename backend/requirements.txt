@@ -5,3 +5,8 @@ pytest-asyncio
 azure-cognitiveservices-speech
 python-dotenv
 httpx
+pytest-mock
+supabase
+opencv-python
+numpy
+scikit-image

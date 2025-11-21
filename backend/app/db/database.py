@@ -1,70 +1,76 @@
-from typing import Dict, Any
-from app.models.worker import Worker
+from dotenv import load_dotenv
+import os
+from supabase import create_client
+
+load_dotenv()  # Carga variables de entorno desde .env si está presente
 
 
 class Database:
-    """
-    Mock temporal que imita el comportamiento del futuro módulo Supabase.
-    Siempre retorna diccionarios con llaves: data, count.
-    """
+    
+    workers_table: str = "Worker"
+    roles_table: str = "Role"
 
-    _WORKERS = {
-        1: {
-            "id": 1,
-            "name": "Pepito",
-            "document": "1.234.567.890",
-            "role": "guardia",
-            "photo": "https://example.com/foto.jpg",
-        }
-    }
+    load_dotenv()  
+    SUPABASE_URL = os.getenv("SUPABASE_URL")
+    SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+    client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-    _next_id = 2
-
-    # ------------------------------------------------------------
-    # LISTAR
-    # ------------------------------------------------------------
+    # Metodos para la tabla de trabajadores
+    
     @classmethod
-    def getWorkerList(cls) -> Dict[str, Any]:
-        data = list(cls._WORKERS.values())
-        return {"data": data, "count": len(data)}
-
-    # ------------------------------------------------------------
-    # OBTENER POR ID
-    # ------------------------------------------------------------
+    def create_worker(cls, payload):
+        return (cls.client.table(cls.workers_table)
+                .insert(payload).execute()) 
+    
     @classmethod
-    def getWorker(cls, worker_id: int) -> Dict[str, Any]:
-        worker = cls._WORKERS.get(worker_id)
-        return {"data": worker, "count": 1 if worker else 0}
-
-    # ------------------------------------------------------------
-    # CREAR
-    # ------------------------------------------------------------
+    def update_worker(cls, worker_id, payload):
+        return (cls.client.table(cls.workers_table)
+                .update(payload).eq("id", worker_id).execute())
+    
     @classmethod
-    def createWorker(cls, worker: Worker) -> Dict[str, Any]:
-        worker_dict = worker.model_dump(mode="json")
-        worker_dict["id"] = cls._next_id
-
-        cls._WORKERS[cls._next_id] = worker_dict
-        cls._next_id += 1
-
-        return {"data": worker_dict, "count": None}
-
-    # ------------------------------------------------------------
-    # ACTUALIZAR
-    # ------------------------------------------------------------
+    def delete_worker(cls, worker_id):
+        return (cls.client.table(cls.workers_table)
+                .delete().eq("id", worker_id).execute())
+    
     @classmethod
-    def updateWorker(cls, worker: Worker) -> Dict[str, Any]:
-        worker_dict = worker.model_dump(mode="json")
+    def get_worker(cls, worker_id):
+        return (cls.client.table(cls.workers_table)
+                .select("*").eq("id", worker_id).execute())
 
-        if worker.id in cls._WORKERS:
-            cls._WORKERS[worker.id].update(worker_dict)
-
-        return {"data": cls._WORKERS.get(worker.id), "count": None}
-
-    # ------------------------------------------------------------
-    # ELIMINAR
-    # ------------------------------------------------------------
     @classmethod
-    def deleteWorker(cls, worker_id: int) -> Dict[str, Any]:
-        deleted = cls._WORKERS.pop(worker_id, None)
-        return {"data": deleted, "count": None}
+    def get_worker_list(cls):
+        return (cls.client.table(cls.workers_table)
+                .select("*").execute())
+    
+    @classmethod
+    def get_workers_by_document(cls, document):
+        return (cls.client.table(cls.workers_table)
+                .select("*").eq("document", document).execute())
+    
+    # Metodos para la tabla de roles
+
+    @classmethod
+    def create_role(cls, payload):
+        return (cls.client.table(cls.roles_table)
+                .insert(payload).execute())
+
+    @classmethod
+    def get_role_list(cls):
+        return (cls.client.table(cls.roles_table)
+                .select("*").execute())
+    
+    @classmethod
+    def get_role(cls, role_id):
+        return (cls.client.table(cls.roles_table)
+                .select("*").eq("id", role_id).execute())
+    
+    @classmethod
+    def delete_role(cls, role_id):
+        return (cls.client.table(cls.roles_table)
+                .delete().eq("id", role_id).execute())
+    
+    @classmethod
+    def update_role(cls, role_id, payload):
+        return (cls.client.table(cls.roles_table)
+                .update(payload).eq("id", role_id).execute())
+    
