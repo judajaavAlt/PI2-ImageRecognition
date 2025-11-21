@@ -21,7 +21,9 @@ async def test_create_worker():
             "photo": "https://example.com/foto.jpg"
         })
 
-    assert response.status_code in (200, 201)
+    print("\n[CREATE WORKER] RESPONSE:", response.json())
+
+    assert response.status_code in (200, 201), response.text
     data = response.json()
     assert data["status"] == "ok"
     assert "data" in data
@@ -41,8 +43,9 @@ async def test_create_worker_duplicate_document():
             "photo": "https://example.com/foto2.jpg"
         })
 
-    # El mock Database NO valida duplicados → siempre 200
-    assert response.status_code in (200, 201)
+    print("\n[DUPLICATE WORKER] RESPONSE:", response.json())
+
+    assert response.status_code in (200, 201), response.text
     data = response.json()
     assert data["status"] == "ok"
     assert "data" in data
@@ -56,7 +59,9 @@ async def test_get_worker_list():
     async with get_client() as ac:
         response = await ac.get("/workers")
 
-    assert response.status_code == 200
+    print("\n[GET WORKER LIST] RESPONSE:", response.json())
+
+    assert response.status_code == 200, response.text
     data = response.json()
     assert data["status"] == "ok"
     assert isinstance(data["data"], list)
@@ -76,7 +81,9 @@ async def test_update_worker():
             "photo": "https://example.com/foto2.jpg"
         })
 
-    assert response.status_code in (200, 201)
+    print("\n[UPDATE WORKER] RESPONSE:", response.json())
+
+    assert response.status_code in (200, 201), response.text
     data = response.json()
     assert data["status"] == "ok"
     assert "data" in data
@@ -90,7 +97,9 @@ async def test_delete_worker():
     async with get_client() as ac:
         response = await ac.delete("/workers/1")
 
-    assert response.status_code in (200, 201)
+    print("\n[DELETE WORKER] RESPONSE:", response.json())
+
+    assert response.status_code in (200, 201), response.text
     data = response.json()
     assert data["status"] == "ok"
     assert "worker_id" in data

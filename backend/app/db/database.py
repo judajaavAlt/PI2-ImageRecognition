@@ -1,13 +1,13 @@
 from typing import Dict, Any
-from models.worker import Worker
+from app.models.worker import Worker
+
 
 class Database:
     """
-    Mock temporal de la capa de base de datos.
-    Cada método devuelve información estática solo para pruebas internas.
+    Mock temporal que imita el comportamiento del futuro módulo Supabase.
+    Siempre retorna diccionarios con llaves: data, count.
     """
 
-    # Datos fake estáticos
     _WORKERS = {
         1: {
             "id": 1,
@@ -18,75 +18,53 @@ class Database:
         }
     }
 
-    _ROLES = {
-        1: {"id": 1, "name": "guardia"},
-        2: {"id": 2, "name": "supervisor"},
-    }
+    _next_id = 2
 
     # ------------------------------------------------------------
-    # WORKERS
+    # LISTAR
+    # ------------------------------------------------------------
+    @classmethod
+    def getWorkerList(cls) -> Dict[str, Any]:
+        data = list(cls._WORKERS.values())
+        return {"data": data, "count": len(data)}
+
+    # ------------------------------------------------------------
+    # OBTENER POR ID
+    # ------------------------------------------------------------
+    @classmethod
+    def getWorker(cls, worker_id: int) -> Dict[str, Any]:
+        worker = cls._WORKERS.get(worker_id)
+        return {"data": worker, "count": 1 if worker else 0}
+
+    # ------------------------------------------------------------
+    # CREAR
     # ------------------------------------------------------------
     @classmethod
     def createWorker(cls, worker: Worker) -> Dict[str, Any]:
-        """
-        Mock: Crea un trabajador (respuesta estática).
-        """
-        return {
-            "status": "ok",
-            "message": "Mock: Worker creado",
-            "data": worker.model_dump()
-        }
+        worker_dict = worker.model_dump(mode="json")
+        worker_dict["id"] = cls._next_id
 
+        cls._WORKERS[cls._next_id] = worker_dict
+        cls._next_id += 1
+
+        return {"data": worker_dict, "count": None}
+
+    # ------------------------------------------------------------
+    # ACTUALIZAR
+    # ------------------------------------------------------------
     @classmethod
     def updateWorker(cls, worker: Worker) -> Dict[str, Any]:
-        """
-        Mock: Actualiza un trabajador (respuesta estática).
-        """
-        return {
-            "status": "ok",
-            "message": "Mock: Worker actualizado",
-            "data": worker.model_dump()
-        }
+        worker_dict = worker.model_dump(mode="json")
 
+        if worker.id in cls._WORKERS:
+            cls._WORKERS[worker.id].update(worker_dict)
+
+        return {"data": cls._WORKERS.get(worker.id), "count": None}
+
+    # ------------------------------------------------------------
+    # ELIMINAR
+    # ------------------------------------------------------------
     @classmethod
-    def DeleteWorker(cls, worker: Worker) -> Dict[str, Any]:
-        """
-        Mock: Elimina un trabajador (respuesta estática).
-        """
-        return {
-            "status": "ok",
-            "message": "Mock: Worker eliminado",
-            "worker_id": worker.id
-        }
-
-    @classmethod
-    def getWorker(cls, worker: Worker) -> Dict[str, Any]:
-        """
-        Mock: Obtiene un trabajador por ID (respuesta estática).
-        """
-        return {
-            "status": "ok",
-            "data": cls._WORKERS.get(worker.id, None)
-        }
-
-    @classmethod
-    def getWorkerList(cls) -> Dict[str, Any]:
-        """
-        Mock: Retorna lista de trabajadores.
-        """
-        return {
-            "status": "ok",
-            "count": len(cls._WORKERS),
-            "data": list(cls._WORKERS.values())
-        }
-
-    @classmethod
-    def getWorkerByCC(cls) -> Dict[str, Any]:
-        """
-        Mock: Busca por documento estático.
-        """
-        return {
-            "status": "ok",
-            "data": cls._WORKERS.get(1)  # siempre retorna Pepito
-        }
-
+    def deleteWorker(cls, worker_id: int) -> Dict[str, Any]:
+        deleted = cls._WORKERS.pop(worker_id, None)
+        return {"data": deleted, "count": None}
