@@ -1,71 +1,79 @@
 from typing import Dict, Any
 from models.worker import Worker
-from db.database import Database
+from services.debug import WorkerManager
 
 
 class WorkerManagerService:
+    """
+    Servicio intermedio entre FastAPI y WorkerManager.
+    Valida datos con Pydantic y normaliza la comunicación.
+    """
 
-    # ------------------------------
+    # ============================================================
     # LISTAR TRABAJADORES
-    # ------------------------------
+    # ============================================================
     @staticmethod
-    async def fetch_workers() -> Dict[str, Any]:
-        result = Database.get_worker_list()
+    async def fetch_workers():
+        """
+        Normaliza la salida de WorkerManager.read_all()
+        para que siempre sea un diccionario con data, count.
+        """
+        workers = WorkerManager.read_all()
 
         return {
-            "data": result.data or [],
-            "count": result.count or 0
+            "data": workers,
+            "count": len(workers)
         }
 
-    # ------------------------------
+    # ============================================================
     # OBTENER TRABAJADOR POR ID
-    # ------------------------------
+    # ============================================================
     @staticmethod
-    async def get_worker(worker_id: int) -> Any:
-        result = Database.get_worker(worker_id)
+    async def get_worker(worker_id: int):
+        worker = WorkerManager.read_by_id(worker_id)
+        return worker
 
-        if not result.data:
-            return None
-
-        return result.data[0]
-
-    # ------------------------------
+    # ============================================================
     # CREAR TRABAJADOR
-    # ------------------------------
+    # ============================================================
     @staticmethod
-    async def create_worker(worker_data: Dict[str, Any]) -> Any:
+    async def create_worker(worker_data: Dict[str, Any]):
+        """
+        Valida con Pydantic y crea el worker.
+        """
         worker = Worker(**worker_data)
 
-        # Convertir HttpUrl → str
-        payload = worker.model_dump()
-        if "photo" in payload:
-            payload["photo"] = str(payload["photo"])
+        created = WorkerManager.create(
+            name=worker.name,
+            document=worker.document,
+            role=worker.role,
+            photo=str(worker.photo) if worker.photo else None
+        )
+        return created
 
-        result = Database.create_worker(payload)
-
-        return result.data[0] if result.data else None
-
-    # ------------------------------
+    # ============================================================
     # ACTUALIZAR TRABAJADOR
-    # ------------------------------
+    # ============================================================
     @staticmethod
-    async def update_worker(worker_id: int, worker_data: Dict[str, Any]) -> Any:
+    async def update_worker(worker_id: int, worker_data: Dict[str, Any]):
         worker_data["id"] = worker_id
+
         worker = Worker(**worker_data)
 
-        payload = worker.model_dump()
-        if "photo" in payload:
-            payload["photo"] = str(payload["photo"])
+        updated, _old = WorkerManager.update(
+            worker_id,
+            name=worker.name,
+            document=worker.document,
+            role=worker.role,
+            photo=str(worker.photo) if worker.photo else None
+        )
 
-        result = Database.update_worker(worker_id, payload)
+        return updated  # <--- solo el worker actualizado
 
-        return result.data[0] if result.data else None
-
-    # ------------------------------
+    # ============================================================
     # ELIMINAR TRABAJADOR
-    # ------------------------------
+    # ============================================================
     @staticmethod
-    async def delete_worker(worker_id: int) -> Any:
-        result = Database.delete_worker(worker_id)
-
-        return result.data[0] if result.data else None
+    async def delete_worker(worker_id: int):
+        deleted = WorkerManager.delete(worker_id)
+        return deleted

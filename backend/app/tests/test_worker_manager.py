@@ -17,13 +17,13 @@ async def test_create_worker():
         response = await ac.post("/workers", json={
             "name": "Carlos",
             "document": "2.345.678.901",
-            "role": "guardia",
+            "role": 1,
             "photo": "https://example.com/foto.jpg"
         })
 
     print("\n[CREATE WORKER] RESPONSE:", response.json())
 
-    assert response.status_code in (200, 201), response.text
+    assert response.status_code == 201
     data = response.json()
     assert data["status"] == "ok"
     assert "data" in data
@@ -31,7 +31,7 @@ async def test_create_worker():
 
 
 # ----------------------------------------------------------------------
-# Test: Crear trabajador con documento duplicado (Database mock NO valida)
+# Test: Crear trabajador con documento duplicado
 # ----------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_create_worker_duplicate_document():
@@ -39,16 +39,15 @@ async def test_create_worker_duplicate_document():
         response = await ac.post("/workers", json={
             "name": "Pedro",
             "document": "2.345.678.901",
-            "role": "operario",
+            "role": 2,
             "photo": "https://example.com/foto2.jpg"
         })
 
     print("\n[DUPLICATE WORKER] RESPONSE:", response.json())
 
-    assert response.status_code in (200, 201), response.text
-    data = response.json()
-    assert data["status"] == "ok"
-    assert "data" in data
+    # La API correcta debe rechazar duplicados → 400
+    assert response.status_code == 400
+    assert "detail" in response.json()
 
 
 # ----------------------------------------------------------------------
@@ -61,8 +60,9 @@ async def test_get_worker_list():
 
     print("\n[GET WORKER LIST] RESPONSE:", response.json())
 
-    assert response.status_code == 200, response.text
+    assert response.status_code == 200
     data = response.json()
+
     assert data["status"] == "ok"
     assert isinstance(data["data"], list)
     assert "count" in data
@@ -77,16 +77,18 @@ async def test_update_worker():
         response = await ac.put("/workers/1", json={
             "name": "Carlos Actualizado",
             "document": "1.234.567.890",
-            "role": "supervisor",
+            "role": 3,
             "photo": "https://example.com/foto2.jpg"
         })
 
     print("\n[UPDATE WORKER] RESPONSE:", response.json())
 
-    assert response.status_code in (200, 201), response.text
+    assert response.status_code == 200
     data = response.json()
+
     assert data["status"] == "ok"
-    assert "data" in data
+    updated = data["data"]     
+    assert updated["name"] == "Carlos Actualizado"
 
 
 # ----------------------------------------------------------------------
@@ -99,7 +101,9 @@ async def test_delete_worker():
 
     print("\n[DELETE WORKER] RESPONSE:", response.json())
 
-    assert response.status_code in (200, 201), response.text
+    assert response.status_code == 200
     data = response.json()
+
     assert data["status"] == "ok"
     assert "worker_id" in data
+    assert data["worker_id"] == 1
