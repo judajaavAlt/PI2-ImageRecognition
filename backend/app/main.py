@@ -2,7 +2,7 @@ from core.CORS import setup_cors
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 import os
-from api import monitoringApi, adminApi, RoleApi, WorkerApi
+from api import monitoringApi, adminApi, RoleApi, WorkerApi, workerManagerApi
 
 # ------------------------------------------------------------------------------
 # Application Metadata

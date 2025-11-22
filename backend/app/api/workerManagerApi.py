@@ -14,12 +14,16 @@ async def get_all_workers():
     Devuelve la lista completa de trabajadores registrados en el sistema.
     """
     try:
-        workers = await WorkerManagerService.fetch_workers()
+        supabase_response = await WorkerManagerService.fetch_workers()
+
+        # 🔥 NORMALIZACIÓN (fix del test)
+        workers = supabase_response.get("data", [])
+        count = supabase_response.get("count", len(workers))
 
         response = {
             "status": "ok",
-            "count": len(workers),
-            "data": workers,
+            "count": count,
+            "data": workers,  # ← ya no es {"data": [...], "count": X}
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         }
 
@@ -34,9 +38,6 @@ async def get_all_workers():
 # ============================================================
 @router.get("/workers/{worker_id}", tags=["Workers"])
 async def get_worker_by_id(worker_id: int):
-    """
-    Obtiene la información de un trabajador específico por su ID.
-    """
     try:
         worker = await WorkerManagerService.get_worker(worker_id)
         if not worker:
@@ -59,9 +60,6 @@ async def get_worker_by_id(worker_id: int):
 # ============================================================
 @router.post("/workers", tags=["Workers"])
 async def create_worker(worker: dict):
-    """
-    Registra un nuevo trabajador en el sistema.
-    """
     try:
         result = await WorkerManagerService.create_worker(worker)
 
@@ -83,9 +81,6 @@ async def create_worker(worker: dict):
 # ============================================================
 @router.put("/workers/{worker_id}", tags=["Workers"])
 async def update_worker(worker_id: int, worker: dict):
-    """
-    Actualiza la información de un trabajador existente.
-    """
     try:
         result = await WorkerManagerService.update_worker(worker_id, worker)
 
@@ -109,9 +104,6 @@ async def update_worker(worker_id: int, worker: dict):
 # ============================================================
 @router.delete("/workers/{worker_id}", tags=["Workers"])
 async def delete_worker(worker_id: int):
-    """
-    Elimina un trabajador del sistema por su ID.
-    """
     try:
         await WorkerManagerService.delete_worker(worker_id)
 

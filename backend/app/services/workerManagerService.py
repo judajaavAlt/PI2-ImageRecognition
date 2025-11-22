@@ -1,57 +1,71 @@
 from typing import Dict, Any
+from models.worker import Worker
 from db.database import Database
-from app.models.worker import Worker
 
 
 class WorkerManagerService:
-    """
-    Servicio que delega TODAS las operaciones CRUD al módulo Database.
-    Solo valida tipos con Pydantic. No verifica existencia ni hace reglas de negocio.
-    """
 
     # ------------------------------
     # LISTAR TRABAJADORES
     # ------------------------------
     @staticmethod
-    async def fetch_workers() -> Any:
-        result = Database.getWorkerList()
-        return result.get("data")
+    async def fetch_workers() -> Dict[str, Any]:
+        result = Database.get_worker_list()
+
+        return {
+            "data": result.data or [],
+            "count": result.count or 0
+        }
 
     # ------------------------------
     # OBTENER TRABAJADOR POR ID
     # ------------------------------
     @staticmethod
     async def get_worker(worker_id: int) -> Any:
-        result = Database.getWorker(worker_id)
-        return result.get("data")
+        result = Database.get_worker(worker_id)
+
+        if not result.data:
+            return None
+
+        return result.data[0]
 
     # ------------------------------
     # CREAR TRABAJADOR
     # ------------------------------
     @staticmethod
     async def create_worker(worker_data: Dict[str, Any]) -> Any:
-        # Validación de tipos mediante Pydantic
         worker = Worker(**worker_data)
 
-        result = Database.createWorker(worker)
-        return result.get("data")
+        # Convertir HttpUrl → str
+        payload = worker.model_dump()
+        if "photo" in payload:
+            payload["photo"] = str(payload["photo"])
+
+        result = Database.create_worker(payload)
+
+        return result.data[0] if result.data else None
 
     # ------------------------------
     # ACTUALIZAR TRABAJADOR
     # ------------------------------
     @staticmethod
     async def update_worker(worker_id: int, worker_data: Dict[str, Any]) -> Any:
-        # Update debe recibir el Worker COMPLETO desde el front
         worker_data["id"] = worker_id
         worker = Worker(**worker_data)
 
-        result = Database.updateWorker(worker)
-        return result.get("data")
+        payload = worker.model_dump()
+        if "photo" in payload:
+            payload["photo"] = str(payload["photo"])
+
+        result = Database.update_worker(worker_id, payload)
+
+        return result.data[0] if result.data else None
 
     # ------------------------------
     # ELIMINAR TRABAJADOR
     # ------------------------------
     @staticmethod
     async def delete_worker(worker_id: int) -> Any:
-        result = Database.deleteWorker(worker_id)
-        return result.get("data")
+        result = Database.delete_worker(worker_id)
+
+        return result.data[0] if result.data else None
