@@ -96,9 +96,16 @@ class RoleManager(JSONStorage):
 class WorkerManager(JSONStorage):
     filename = "workers.json"
 
+    # ============================================================
+    # CREATE → Crear un trabajador con validación de duplicados
+    # ============================================================
     @classmethod
     def create(cls, name: str, document: str, role: int, photo: str):
         workers = cls._load()
+
+        # Validación: documento duplicado
+        if any(w["document"] == document for w in workers):
+            raise ValueError(f"El documento {document} ya está registrado")
 
         new_id = (max([w["id"] for w in workers]) + 1) if workers else 1
 
@@ -115,30 +122,53 @@ class WorkerManager(JSONStorage):
 
         return new_worker
 
+    # ============================================================
+    # READ ALL → Obtener todos los trabajadores
+    # ============================================================
     @classmethod
     def read_all(cls):
         return cls._load()
 
+    # ============================================================
+    # READ BY ID → Obtener trabajador por ID
+    # ============================================================
     @classmethod
     def read_by_id(cls, worker_id: int):
         workers = cls._load()
         return next((w for w in workers if w["id"] == worker_id), None)
 
+    # ============================================================
+    # UPDATE → Actualizar trabajador
+    # (Incluye validación de duplicado si se cambia "document")
+    # ============================================================
     @classmethod
     def update(cls, worker_id: int, **changes):
         workers = cls._load()
 
         for w in workers:
             if w["id"] == worker_id:
+
                 old_worker = w.copy()
+
+                # 🔍 Validación: no permitir que dos workers tengan el mismo doc
+                if "document" in changes:
+                    new_doc = changes["document"]
+                    if any(x["document"] == new_doc and x["id"] != worker_id for x in workers):
+                        raise ValueError(f"El documento {new_doc} ya está registrado")
+
+                # Aplicar cambios
                 for key, value in changes.items():
                     if key in w:
                         w[key] = value
+
                 cls._save(workers)
-                return w, old_worker              # (updated, previous_state)
+                return w, old_worker
 
         return None, None
 
+    # ============================================================
+    # DELETE → Eliminar trabajador
+    # ============================================================
     @classmethod
     def delete(cls, worker_id: int):
         workers = cls._load()
@@ -148,6 +178,6 @@ class WorkerManager(JSONStorage):
                 deleted_worker = w.copy()
                 new_workers = [x for x in workers if x["id"] != worker_id]
                 cls._save(new_workers)
-                return deleted_worker              # return deleted element
+                return deleted_worker
 
         return None
