@@ -32,7 +32,7 @@ export const workersApi = {
     const payload = {
       name: workerData.name || "",
       document: workerData.documentId || "",
-      role: parseInt(workerData.role) || 0,
+      role: workerData.role ? parseInt(workerData.role) : 1,
       photo: workerData.photo || "",
     };
 
@@ -68,7 +68,7 @@ export const workersApi = {
     const payload = {
       name: workerData.name || "",
       document: workerData.documentId || "",
-      role: parseInt(workerData.role) || 0,
+      role: workerData.role ? parseInt(workerData.role) : 1,
       photo: workerData.photo || "",
     };
 

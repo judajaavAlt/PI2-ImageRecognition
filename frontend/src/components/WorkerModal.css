@@ -173,6 +173,9 @@
   font-weight: 500;
   font-size: 1rem;
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-primary-modal:hover {
@@ -189,6 +192,9 @@
   font-weight: 500;
   font-size: 1rem;
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-cancel:hover {

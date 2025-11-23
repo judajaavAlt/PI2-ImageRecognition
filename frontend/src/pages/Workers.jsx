@@ -81,6 +81,12 @@ function Workers() {
     []
   );
 
+  // Función helper para obtener el nombre del rol por ID
+  const getRoleName = (roleId) => {
+    const role = rolesData.find((r) => r.id === parseInt(roleId));
+    return role ? role.name : "Sin rol";
+  };
+
   const handleView = (row) => {
     setSelectedWorker(row);
     setShowViewModal(true);
@@ -294,7 +300,7 @@ function Workers() {
                         index={idx + 1}
                         name={worker.name}
                         documentId={worker.document}
-                        role={worker.role}
+                        role={getRoleName(worker.role)}
                         onView={() => handleView(worker)}
                         onEdit={() => handleEdit(worker)}
                         onDelete={() => handleDelete(worker)}

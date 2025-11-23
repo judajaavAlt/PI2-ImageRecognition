@@ -75,11 +75,21 @@ function WorkerModal({
     return "Ver trabajador";
   };
 
+  // Validar que todos los campos requeridos estén completos
+  const isFormValid = () => {
+    return (
+      formData.name.trim() !== "" &&
+      formData.documentId.trim() !== "" &&
+      formData.role !== "" &&
+      formData.photo !== null
+    );
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay">
+      <div className="modal-content">
         <div className="modal-header">
           <h2 className="modal-title">{getTitle()}</h2>
           <button className="modal-close-btn" onClick={onClose}>
@@ -109,7 +119,13 @@ function WorkerModal({
                 id="documentId"
                 name="documentId"
                 value={formData.documentId}
-                onChange={handleChange}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Solo permitir números
+                  if (value === "" || /^[0-9]+$/.test(value)) {
+                    handleChange(e);
+                  }
+                }}
                 disabled={isViewMode}
                 placeholder="Cédula / Documento"
               />
@@ -125,10 +141,11 @@ function WorkerModal({
                 disabled={isViewMode}
               >
                 <option value="">Seleccionar rol</option>
-                <option value="Manufacturero">Manufacturero</option>
-                <option value="Supervisor">Supervisor</option>
-                <option value="Operario">Operario</option>
-                <option value="Técnico">Técnico</option>
+                <option value="1">Manufacturero</option>
+                <option value="2">Obrero</option>
+                <option value="3">Operario de producción</option>
+                <option value="4">Inspector de calidad</option>
+                <option value="5">Mantenimiento</option>
               </select>
             </div>
           </div>
@@ -165,7 +182,15 @@ function WorkerModal({
 
         <div className="modal-footer">
           {!isViewMode && (
-            <button className="btn btn-primary-modal" onClick={handleSubmit}>
+            <button
+              className="btn btn-primary-modal"
+              onClick={handleSubmit}
+              disabled={!isFormValid()}
+              style={{
+                opacity: isFormValid() ? 1 : 0.5,
+                cursor: isFormValid() ? "pointer" : "not-allowed",
+              }}
+            >
               + {isCreateMode ? "Agregar" : "Guardar cambios"}
             </button>
           )}

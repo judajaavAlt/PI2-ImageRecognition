@@ -105,7 +105,7 @@
 }
 
 .btn-edit {
-  background: #E6F6EF;
+  background: #e6f6ef;
   color: #3d7462;
   border: 1px solid #3d7462;
 }
@@ -185,9 +185,9 @@ td.w-num {
 }
 th.actions,
 td.actions {
-  width: 320px;
-  min-width: 320px;
-  max-width: 320px;
+  width: 230px;
+  min-width: 230px;
+  max-width: 230px;
   text-align: center !important;
   white-space: nowrap;
 }
