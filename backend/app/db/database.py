@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 import os
 from supabase import create_client
+from services.imageUtils import ImageUtils
 
 load_dotenv()  # Carga variables de entorno desde .env si está presente
 
@@ -19,11 +20,21 @@ class Database:
     
     @classmethod
     def create_worker(cls, payload):
+        # Asegurar que la foto esté en base64
+        if 'photo' in payload and payload['photo']:
+            if isinstance(payload['photo'], bytes):
+                payload['photo'] = ImageUtils.binary_to_base64(payload['photo'])
+        
         return (cls.client.table(cls.workers_table)
                 .insert(payload).execute()) 
     
     @classmethod
     def update_worker(cls, worker_id, payload):
+        # Asegurar que la foto esté en base64
+        if 'photo' in payload and payload['photo']:
+            if isinstance(payload['photo'], bytes):
+                payload['photo'] = ImageUtils.binary_to_base64(payload['photo'])
+        
         return (cls.client.table(cls.workers_table)
                 .update(payload).eq("id", worker_id).execute())
     
@@ -34,13 +45,17 @@ class Database:
     
     @classmethod
     def get_worker(cls, worker_id):
-        return (cls.client.table(cls.workers_table)
+        result = (cls.client.table(cls.workers_table)
                 .select("*").eq("id", worker_id).execute())
+        # Las fotos ya vienen en base64 desde la DB
+        return result
 
     @classmethod
     def get_worker_list(cls):
-        return (cls.client.table(cls.workers_table)
+        result = (cls.client.table(cls.workers_table)
                 .select("*").execute())
+        # Las fotos ya vienen en base64 desde la DB
+        return result
     
     @classmethod
     def get_workers_by_document(cls, document):

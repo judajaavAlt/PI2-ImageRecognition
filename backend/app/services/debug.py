@@ -1,5 +1,6 @@
 import json
 import os
+from services.imageUtils import ImageUtils
 
 
 # ============================================================
@@ -102,6 +103,10 @@ class WorkerManager(JSONStorage):
 
         new_id = (max([w["id"] for w in workers]) + 1) if workers else 1
 
+        # Convertir photo a base64 si es necesario
+        if photo and isinstance(photo, bytes):
+            photo = ImageUtils.binary_to_base64(photo)
+
         new_worker = {
             "id": new_id,
             "name": name,
@@ -127,6 +132,11 @@ class WorkerManager(JSONStorage):
     @classmethod
     def update(cls, worker_id: int, **changes):
         workers = cls._load()
+
+        # Convertir photo a base64 si está presente y es binario
+        if 'photo' in changes and changes['photo']:
+            if isinstance(changes['photo'], bytes):
+                changes['photo'] = ImageUtils.binary_to_base64(changes['photo'])
 
         for w in workers:
             if w["id"] == worker_id:
