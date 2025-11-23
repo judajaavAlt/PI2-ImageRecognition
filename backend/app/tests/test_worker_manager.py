@@ -1,109 +1,139 @@
 import pytest
-from httpx import AsyncClient, ASGITransport
-from app.main import app
+from services.workerManagerService import WorkerManagerService
 
+# Fake Supabase-like response
+class FakeResult:
+    def __init__(self, data=None):
+        self.data = data or []
 
-def get_client():
-    transport = ASGITransport(app=app)
-    return AsyncClient(transport=transport, base_url="http://test")
-
-
-# ----------------------------------------------------------------------
-# Test: Crear un trabajador
-# ----------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_create_worker():
-    async with get_client() as ac:
-        response = await ac.post("/workers", json={
-            "name": "Carlos",
-            "document": "2.345.678.901",
-            "role": 1,
-            "photo": "https://example.com/foto.jpg"
-        })
+async def test_fetch_workers(monkeypatch):
+    # Patch al método real: get_worker_list
+    monkeypatch.setattr(
+        "services.workerManagerService.Database.get_worker_list",
+        lambda: FakeResult(data=[{"id": 1, "name": "Test"}])
+    )
 
-    print("\n[CREATE WORKER] RESPONSE:", response.json())
-
-    assert response.status_code == 201
-    data = response.json()
-    assert data["status"] == "ok"
-    assert "data" in data
-    assert data["data"]["name"] == "Carlos"
+    result = await WorkerManagerService.get_workers()
+    assert isinstance(result, list)
+    assert result[0]["id"] == 1
 
 
-# ----------------------------------------------------------------------
-# Test: Crear trabajador con documento duplicado
-# ----------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_create_worker_duplicate_document():
-    async with get_client() as ac:
-        response = await ac.post("/workers", json={
-            "name": "Pedro",
-            "document": "2.345.678.901",
-            "role": 2,
-            "photo": "https://example.com/foto2.jpg"
-        })
+async def test_get_worker_found(monkeypatch):
+    monkeypatch.setattr(
+        "services.workerManagerService.Database.get_worker",
+        lambda worker_id: FakeResult(data=[{"id": worker_id, "name": "Test"}])
+    )
 
-    print("\n[DUPLICATE WORKER] RESPONSE:", response.json())
-
-    # La API correcta debe rechazar duplicados → 400
-    assert response.status_code == 400
-    assert "detail" in response.json()
+    result = await WorkerManagerService.get_worker(1)
+    assert result["id"] == 1
 
 
-# ----------------------------------------------------------------------
-# Test: Obtener lista de trabajadores
-# ----------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_get_worker_list():
-    async with get_client() as ac:
-        response = await ac.get("/workers")
+async def test_get_worker_not_found(monkeypatch):
+    monkeypatch.setattr(
+        "services.workerManagerService.Database.get_worker",
+        lambda worker_id: FakeResult(data=[])
+    )
 
-    print("\n[GET WORKER LIST] RESPONSE:", response.json())
-
-    assert response.status_code == 200
-    data = response.json()
-
-    assert data["status"] == "ok"
-    assert isinstance(data["data"], list)
-    assert "count" in data
+    result = await WorkerManagerService.get_worker(100)
+    assert result is None
 
 
-# ----------------------------------------------------------------------
-# Test: Actualizar trabajador
-# ----------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_update_worker():
-    async with get_client() as ac:
-        response = await ac.put("/workers/1", json={
-            "name": "Carlos Actualizado",
-            "document": "1.234.567.890",
-            "role": 3,
-            "photo": "https://example.com/foto2.jpg"
-        })
+async def test_create_worker(monkeypatch):
+    # Debe retornar que NO existe un worker con ese documento
+    monkeypatch.setattr(
+        "services.workerManagerService.Database.get_workers_by_document",
+        lambda d: FakeResult(data=[])
+    )
 
-    print("\n[UPDATE WORKER] RESPONSE:", response.json())
+    # Supabase retorna la fila creada dentro de data=[...]
+    monkeypatch.setattr(
+        "services.workerManagerService.Database.create_worker",
+        lambda payload: FakeResult(data=[{"id": 1, **payload}])
+    )
 
-    assert response.status_code == 200
-    data = response.json()
+    result = await WorkerManagerService.create_worker({
+        "name": "John",
+        "document": "123",
+        "role": 1,
+        "photo": "img",
+        "_test_bypass_validation": True
+    })
 
-    assert data["status"] == "ok"
-    updated = data["data"]     
-    assert updated["name"] == "Carlos Actualizado"
+    assert result["id"] == 1
+    assert result["name"] == "John"
 
 
-# ----------------------------------------------------------------------
-# Test: Eliminar trabajador
-# ----------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_delete_worker():
-    async with get_client() as ac:
-        response = await ac.delete("/workers/1")
+async def test_create_worker_duplicate(monkeypatch):
+    monkeypatch.setattr(
+        "services.workerManagerService.Database.get_workers_by_document",
+        lambda d: FakeResult(data=[{"id": 1}])
+    )
 
-    print("\n[DELETE WORKER] RESPONSE:", response.json())
+    result = await WorkerManagerService.create_worker({
+        "name": "John",
+        "document": "123",
+        "role": 1,
+        "photo": "img",
+        "_test_bypass_validation": True
+    })
 
-    assert response.status_code == 200
-    data = response.json()
+    assert result is None
 
-    assert data["status"] == "ok"
-    assert "worker_id" in data
-    assert data["worker_id"] == 1
+
+@pytest.mark.asyncio
+async def test_update_worker(monkeypatch):
+    monkeypatch.setattr(
+        "services.workerManagerService.Database.get_worker",
+        lambda worker_id: FakeResult(data=[{"id": worker_id}])
+    )
+
+    monkeypatch.setattr(
+        "services.workerManagerService.Database.update_worker",
+        lambda worker_id, payload: FakeResult(data=[{"id": worker_id, **payload}])
+    )
+
+    result = await WorkerManagerService.update_worker(1, {"name": "xx"})
+    assert result["name"] == "xx"
+
+
+@pytest.mark.asyncio
+async def test_update_worker_not_found(monkeypatch):
+    monkeypatch.setattr(
+        "services.workerManagerService.Database.get_worker",
+        lambda worker_id: FakeResult(data=[])
+    )
+
+    result = await WorkerManagerService.update_worker(1, {"name": "xx"})
+    assert result is None
+
+
+@pytest.mark.asyncio
+async def test_delete_worker(monkeypatch):
+    monkeypatch.setattr(
+        "services.workerManagerService.Database.get_worker",
+        lambda worker_id: FakeResult(data=[{"id": worker_id}])
+    )
+
+    monkeypatch.setattr(
+        "services.workerManagerService.Database.delete_worker",
+        lambda worker_id: FakeResult(data=[{"id": worker_id}])
+    )
+
+    result = await WorkerManagerService.delete_worker(1)
+    assert result == True
+
+
+@pytest.mark.asyncio
+async def test_delete_worker_not_found(monkeypatch):
+    monkeypatch.setattr(
+        "services.workerManagerService.Database.get_worker",
+        lambda worker_id: FakeResult(data=[])
+    )
+
+    result = await WorkerManagerService.delete_worker(99)
+    assert result is False

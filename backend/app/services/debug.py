@@ -103,7 +103,7 @@ class WorkerManager(JSONStorage):
     def create(cls, name: str, document: str, role: int, photo: str):
         workers = cls._load()
 
-        # Validación: documento duplicado
+        # 🔍 Validación: documento duplicado
         if any(w["document"] == document for w in workers):
             raise ValueError(f"El documento {document} ya está registrado")
 
