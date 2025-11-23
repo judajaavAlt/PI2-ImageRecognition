@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status
 from pydantic import BaseModel
-from services.debug import WorkerManager
+from services.workerManager import WorkerManager
 
 router = APIRouter(prefix="/workers", tags=["Worker managing"])
 
