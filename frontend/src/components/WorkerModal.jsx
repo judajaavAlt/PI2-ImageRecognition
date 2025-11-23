@@ -99,55 +99,83 @@ function WorkerModal({
 
         <div className="modal-body">
           <div className="modal-left">
-            <div className="form-group">
-              <label htmlFor="name">Nombre completo</label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                disabled={isViewMode}
-                placeholder="Nombre completo"
-              />
+            <div className="form-fields-container">
+              <div className="input-card">
+                <div className="form-group">
+                  <label htmlFor="name">Nombre completo</label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    disabled={isViewMode}
+                    placeholder="Nombre completo"
+                  />
+                </div>
+              </div>
+
+              <div className="input-card">
+                <div className="form-group">
+                  <label htmlFor="documentId">Cédula / Documento</label>
+                  <input
+                    type="text"
+                    id="documentId"
+                    name="documentId"
+                    value={formData.documentId}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Solo permitir números
+                      if (value === "" || /^[0-9]+$/.test(value)) {
+                        handleChange(e);
+                      }
+                    }}
+                    disabled={isViewMode}
+                    placeholder="Cédula / Documento"
+                  />
+                </div>
+              </div>
+
+              <div className="form-group-role">
+                <label htmlFor="role" className="role-label">
+                  Rol asignado
+                </label>
+                <select
+                  id="role"
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                  disabled={isViewMode}
+                  className="role-select"
+                >
+                  <option value="">Seleccionar rol</option>
+                  <option value="1">Manufacturero</option>
+                  <option value="2">Obrero</option>
+                  <option value="3">Operario de producción</option>
+                  <option value="4">Inspector de calidad</option>
+                  <option value="5">Mantenimiento</option>
+                </select>
+              </div>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="documentId">Cédula / Documento</label>
-              <input
-                type="text"
-                id="documentId"
-                name="documentId"
-                value={formData.documentId}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  // Solo permitir números
-                  if (value === "" || /^[0-9]+$/.test(value)) {
-                    handleChange(e);
-                  }
-                }}
-                disabled={isViewMode}
-                placeholder="Cédula / Documento"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="role">Rol asignado</label>
-              <select
-                id="role"
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                disabled={isViewMode}
-              >
-                <option value="">Seleccionar rol</option>
-                <option value="1">Manufacturero</option>
-                <option value="2">Obrero</option>
-                <option value="3">Operario de producción</option>
-                <option value="4">Inspector de calidad</option>
-                <option value="5">Mantenimiento</option>
-              </select>
-            </div>
+            {!isViewMode && (
+              <div className="modal-left-buttons">
+                <button
+                  className="btn btn-primary-modal"
+                  onClick={handleSubmit}
+                  disabled={!isFormValid()}
+                  style={{
+                    opacity: isFormValid() ? 1 : 0.5,
+                    cursor: isFormValid() ? "pointer" : "not-allowed",
+                  }}
+                >
+                  + {isCreateMode ? "Agregar" : "Guardar cambios"}
+                </button>
+                <button className="btn btn-cancel" onClick={onClose}>
+                  ✕ Cancelar
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="modal-right">
@@ -180,24 +208,13 @@ function WorkerModal({
           </div>
         </div>
 
-        <div className="modal-footer">
-          {!isViewMode && (
-            <button
-              className="btn btn-primary-modal"
-              onClick={handleSubmit}
-              disabled={!isFormValid()}
-              style={{
-                opacity: isFormValid() ? 1 : 0.5,
-                cursor: isFormValid() ? "pointer" : "not-allowed",
-              }}
-            >
-              + {isCreateMode ? "Agregar" : "Guardar cambios"}
+        {isViewMode && (
+          <div className="modal-footer">
+            <button className="btn btn-cancel" onClick={onClose}>
+              ✕ Cancelar
             </button>
-          )}
-          <button className="btn btn-cancel" onClick={onClose}>
-            ✕ Cancelar
-          </button>
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
