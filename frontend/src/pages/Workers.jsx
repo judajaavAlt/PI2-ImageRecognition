@@ -5,6 +5,7 @@ import RoleItem from "../components/RoleItem";
 import RoleModal from "../components/RoleModal";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 import Notification from "../components/Notification";
+import { workersApi } from "../services/api";
 import "./workers.css";
 
 function Workers() {
@@ -21,6 +22,13 @@ function Workers() {
   const [roleToDelete, setRoleToDelete] = useState(null);
   const [notification, setNotification] = useState(null);
   const [isClosingNotification, setIsClosingNotification] = useState(false);
+  const [workers, setWorkers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Cargar trabajadores al montar el componente
+  useEffect(() => {
+    loadWorkers();
+  }, []);
 
   useEffect(() => {
     if (notification) {
@@ -30,6 +38,24 @@ function Workers() {
       return () => clearTimeout(timer);
     }
   }, [notification]);
+
+  const loadWorkers = async () => {
+    try {
+      setLoading(true);
+      const data = await workersApi.getAll();
+      setWorkers(data);
+    } catch (error) {
+      showNotification(
+        "❌",
+        "Error",
+        "No se pudieron cargar los trabajadores",
+        "error"
+      );
+      console.error("Error loading workers:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCloseNotification = () => {
     setIsClosingNotification(true);
@@ -42,17 +68,6 @@ function Workers() {
   const showNotification = (icon, title, content, type = "info") => {
     setNotification({ icon, title, content, type });
   };
-
-  const data = useMemo(
-    () =>
-      Array.from({ length: 9 }).map((_, i) => ({
-        id: i + 1,
-        name: "pepito perez de la cruz",
-        documentId: "1.234.523.432",
-        role: "Manufacturero",
-      })),
-    []
-  );
 
   const rolesData = useMemo(
     () => [
@@ -75,37 +90,73 @@ function Workers() {
     setShowDeleteWorkerModal(true);
   };
 
-  const confirmDeleteWorker = () => {
-    console.log("Trabajador eliminado:", workerToDelete);
-    showNotification(
-      "🗑️",
-      "Trabajador eliminado",
-      `El trabajador ${workerToDelete.name} ha sido eliminado del registro exitosamente`,
-      "error"
-    );
-    // Aquí iría la llamada a la API para eliminar el trabajador
+  const confirmDeleteWorker = async () => {
+    try {
+      await workersApi.delete(workerToDelete.id);
+      showNotification(
+        "🗑️",
+        "Trabajador eliminado",
+        `El trabajador ${workerToDelete.name} ha sido eliminado del registro exitosamente`,
+        "error"
+      );
+      setShowDeleteWorkerModal(false);
+      setWorkerToDelete(null);
+      await loadWorkers();
+    } catch (error) {
+      showNotification(
+        "❌",
+        "Error",
+        "No se pudo eliminar el trabajador",
+        "error"
+      );
+      console.error("Error deleting worker:", error);
+    }
   };
 
-  const handleCreateWorker = (formData) => {
-    console.log("Datos del nuevo trabajador:", formData);
-    showNotification(
-      "✅",
-      "Trabajador creado",
-      `El trabajador ${formData.name} ha sido agregado exitosamente`,
-      "success"
-    );
-    // Aquí iría la llamada a la API para crear el trabajador
+  const handleCreateWorker = async (formData) => {
+    try {
+      console.log("Sending worker data:", formData);
+      await workersApi.create(formData);
+      showNotification(
+        "✅",
+        "Trabajador creado",
+        `El trabajador ${formData.name} ha sido agregado exitosamente`,
+        "success"
+      );
+      setShowCreateModal(false);
+      await loadWorkers();
+    } catch (error) {
+      showNotification(
+        "❌",
+        "Error",
+        error.message || "No se pudo crear el trabajador",
+        "error"
+      );
+      console.error("Error creating worker:", error);
+    }
   };
 
-  const handleUpdateWorker = (formData) => {
-    console.log("Datos actualizados del trabajador:", formData);
-    showNotification(
-      "✏️",
-      "Trabajador actualizado",
-      `Los datos de ${formData.name} han sido actualizados exitosamente`,
-      "success"
-    );
-    // Aquí iría la llamada a la API para actualizar el trabajador
+  const handleUpdateWorker = async (formData) => {
+    try {
+      await workersApi.update(selectedWorker.id, formData);
+      showNotification(
+        "✏️",
+        "Trabajador actualizado",
+        `Los datos de ${formData.name} han sido actualizados exitosamente`,
+        "success"
+      );
+      setShowEditModal(false);
+      setSelectedWorker(null);
+      await loadWorkers();
+    } catch (error) {
+      showNotification(
+        "❌",
+        "Error",
+        "No se pudo actualizar el trabajador",
+        "error"
+      );
+      console.error("Error updating worker:", error);
+    }
   };
 
   const handleEditRole = (role) => {
@@ -195,30 +246,57 @@ function Workers() {
             )}
           </div>
           {activeTab === "workers" ? (
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>N. de registro</th>
-                  <th>Nombre completo</th>
-                  <th>Cédula / Documento</th>
-                  <th>Rol asignado</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.map((row, idx) => (
-                  <WorkerItem
-                    key={row.id}
-                    index={idx + 1}
-                    name={row.name}
-                    documentId={row.documentId}
-                    role={row.role}
-                    onEdit={() => handleEdit(row)}
-                    onDelete={() => handleDelete(row)}
-                  />
-                ))}
-              </tbody>
-            </table>
+            loading ? (
+              <div
+                style={{
+                  padding: "40px",
+                  textAlign: "center",
+                  color: "#64748b",
+                }}
+              >
+                Cargando trabajadores...
+              </div>
+            ) : (
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>N. de registro</th>
+                    <th>Nombre completo</th>
+                    <th>Cédula / Documento</th>
+                    <th>Rol asignado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {workers.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan="5"
+                        style={{
+                          padding: "40px",
+                          textAlign: "center",
+                          color: "#64748b",
+                        }}
+                      >
+                        No hay trabajadores registrados
+                      </td>
+                    </tr>
+                  ) : (
+                    workers.map((worker, idx) => (
+                      <WorkerItem
+                        key={worker.id}
+                        index={idx + 1}
+                        name={worker.name}
+                        documentId={worker.document}
+                        role={worker.role}
+                        onEdit={() => handleEdit(worker)}
+                        onDelete={() => handleDelete(worker)}
+                      />
+                    ))
+                  )}
+                </tbody>
+              </table>
+            )
           ) : (
             <table className="table">
               <thead>
