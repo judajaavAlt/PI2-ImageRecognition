@@ -12,6 +12,7 @@ function Workers() {
   const [activeTab, setActiveTab] = useState("workers");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
   const [selectedWorker, setSelectedWorker] = useState(null);
   const [showCreateRoleModal, setShowCreateRoleModal] = useState(false);
   const [showEditRoleModal, setShowEditRoleModal] = useState(false);
@@ -79,6 +80,11 @@ function Workers() {
     ],
     []
   );
+
+  const handleView = (row) => {
+    setSelectedWorker(row);
+    setShowViewModal(true);
+  };
 
   const handleEdit = (row) => {
     setSelectedWorker(row);
@@ -289,6 +295,7 @@ function Workers() {
                         name={worker.name}
                         documentId={worker.document}
                         role={worker.role}
+                        onView={() => handleView(worker)}
                         onEdit={() => handleEdit(worker)}
                         onDelete={() => handleDelete(worker)}
                       />
@@ -329,6 +336,16 @@ function Workers() {
         onClose={() => setShowCreateModal(false)}
         mode="create"
         onSubmit={handleCreateWorker}
+      />
+
+      <WorkerModal
+        isOpen={showViewModal}
+        onClose={() => {
+          setShowViewModal(false);
+          setSelectedWorker(null);
+        }}
+        mode="view"
+        workerData={selectedWorker}
       />
 
       <WorkerModal

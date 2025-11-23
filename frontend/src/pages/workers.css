@@ -94,6 +94,16 @@
   background: #1d4ed8;
 }
 
+.btn-view {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #0369a1;
+}
+
+.btn-view:hover {
+  background: #bae6fd;
+}
+
 .btn-edit {
   background: #E6F6EF;
   color: #3d7462;
@@ -175,9 +185,9 @@ td.w-num {
 }
 th.actions,
 td.actions {
-  width: 230px;
-  min-width: 230px;
-  max-width: 230px;
+  width: 320px;
+  min-width: 320px;
+  max-width: 320px;
   text-align: center !important;
   white-space: nowrap;
 }

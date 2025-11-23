@@ -35,9 +35,9 @@ export const workersApi = {
       role: parseInt(workerData.role) || 0,
       photo: workerData.photo || "",
     };
-    
+
     console.log("Payload being sent:", payload);
-    
+
     const response = await fetch(`${API_URL}/workers/`, {
       method: "POST",
       headers: {
@@ -49,15 +49,15 @@ export const workersApi = {
       const errorData = await response.json().catch(() => ({}));
       console.error("Error response:", errorData);
       console.error("Error detail:", JSON.stringify(errorData.detail, null, 2));
-      
+
       // Si detail es un array de errores de validación
       if (Array.isArray(errorData.detail)) {
-        const errorMessages = errorData.detail.map(err => 
-          `${err.loc ? err.loc.join('.') : 'Campo'}: ${err.msg}`
-        ).join(', ');
+        const errorMessages = errorData.detail
+          .map((err) => `${err.loc ? err.loc.join(".") : "Campo"}: ${err.msg}`)
+          .join(", ");
         throw new Error(errorMessages);
       }
-      
+
       throw new Error(errorData.detail || "Error al crear trabajador");
     }
     return response.json();
@@ -71,9 +71,9 @@ export const workersApi = {
       role: parseInt(workerData.role) || 0,
       photo: workerData.photo || "",
     };
-    
+
     console.log("Update payload being sent:", payload);
-    
+
     const response = await fetch(`${API_URL}/workers/${id}`, {
       method: "PUT",
       headers: {

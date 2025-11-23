@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./WorkerModal.css";
 
 function WorkerModal({
@@ -9,11 +9,32 @@ function WorkerModal({
   onSubmit,
 }) {
   const [formData, setFormData] = useState({
-    name: workerData?.name || "",
-    documentId: workerData?.documentId || "",
-    role: workerData?.role || "",
-    photo: workerData?.photo || null,
+    name: "",
+    documentId: "",
+    role: "",
+    photo: null,
   });
+
+  // Actualizar formData cuando cambia workerData o mode
+  useEffect(() => {
+    if (mode === "create" || !workerData) {
+      // Limpiar el formulario para modo create
+      setFormData({
+        name: "",
+        documentId: "",
+        role: "",
+        photo: null,
+      });
+    } else {
+      // Cargar datos del trabajador para edit/view
+      setFormData({
+        name: workerData.name || "",
+        documentId: workerData.document || "",
+        role: workerData.role || "",
+        photo: workerData.photo || null,
+      });
+    }
+  }, [workerData, mode, isOpen]);
 
   const isViewMode = mode === "view";
   const isEditMode = mode === "edit";
