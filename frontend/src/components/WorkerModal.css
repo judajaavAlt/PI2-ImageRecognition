@@ -84,7 +84,7 @@
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 .form-group label {
@@ -105,7 +105,7 @@
 .form-group-role {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .role-label {
@@ -122,11 +122,6 @@
   background: white;
   color: #0f172a;
   cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 40px;
 }
 
 .form-group input:focus,
@@ -147,11 +142,12 @@
   flex-direction: column;
   align-items: center;
   gap: 20px;
+  height: 100%;
 }
 
 .photo-upload-area {
   width: 75%;
-  height: 320px;
+  flex: 1;
   background: white;
   border: 2px solid #d1d5db;
   border-radius: 8px;
