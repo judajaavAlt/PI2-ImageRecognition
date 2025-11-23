@@ -1,139 +1,126 @@
 import pytest
-from services.workerManagerService import WorkerManagerService
+from unittest.mock import patch, MagicMock
+from services.workerManager import WorkerManager
 
-# Fake Supabase-like response
-class FakeResult:
-    def __init__(self, data=None):
-        self.data = data or []
 
-@pytest.mark.asyncio
-async def test_fetch_workers(monkeypatch):
-    # Patch al método real: get_worker_list
-    monkeypatch.setattr(
-        "services.workerManagerService.Database.get_worker_list",
-        lambda: FakeResult(data=[{"id": 1, "name": "Test"}])
+# ---------------------------------------------------------
+# Helper to build fake database response objects
+# ---------------------------------------------------------
+class FakeResponse:
+    def __init__(self, data):
+        self.data = data
+
+
+# =========================================================
+# CREATE
+# =========================================================
+@patch("services.workerManager.Database")
+def test_create_worker(mock_db):
+
+    mock_db.create_worker.return_value = FakeResponse([
+        {"id": 1, "name": "Alex", "document": "123", "role": 2, "photo": "img.jpg"}
+    ])
+
+    worker = WorkerManager.create("Alex", "123", 2, "img.jpg")
+
+    assert worker["id"] == 1
+    mock_db.create_worker.assert_called_once()
+
+
+# =========================================================
+# READ ALL
+# =========================================================
+@patch("services.workerManager.Database")
+def test_read_all_workers(mock_db):
+
+    mock_db.get_worker_list.return_value = FakeResponse([
+        {"id": 1, "name": "Alex"},
+        {"id": 2, "name": "Maria"}
+    ])
+
+    workers = WorkerManager.read_all()
+
+    assert len(workers) == 2
+    mock_db.get_worker_list.assert_called_once()
+
+
+# =========================================================
+# READ BY ID
+# =========================================================
+@patch("services.workerManager.Database")
+def test_read_by_id(mock_db):
+
+    mock_db.get_worker.return_value = FakeResponse([
+        {"id": 5, "name": "Mario"}
+    ])
+
+    worker = WorkerManager.read_by_id(5)
+
+    assert worker["id"] == 5
+    mock_db.get_worker.assert_called_once_with(5)
+
+
+# =========================================================
+# UPDATE
+# =========================================================
+@patch("services.workerManager.Database")
+def test_update_worker(mock_db):
+
+    # Initial list
+    mock_db.get_worker_list.return_value = FakeResponse([
+        {"id": 1, "name": "Alex", "document": "123", "role": 1, "photo": "a.jpg"},
+        {"id": 2, "name": "Maria", "document": "456", "role": 2, "photo": "b.jpg"},
+    ])
+
+    mock_db.update_worker.return_value = None
+
+    old_worker = WorkerManager.update(1, name="ALEX-UPDATED")
+
+    assert old_worker["name"] == "Alex"
+    mock_db.update_worker.assert_called_once_with(
+        1,
+        {"id": 1, "name": "ALEX-UPDATED", "document": "123", "role": 1, "photo": "a.jpg"}
     )
 
-    result = await WorkerManagerService.get_workers()
-    assert isinstance(result, list)
-    assert result[0]["id"] == 1
+
+# =========================================================
+# UPDATE NOT FOUND
+# =========================================================
+@patch("services.workerManager.Database")
+def test_update_worker_not_found(mock_db):
+
+    mock_db.get_worker_list.return_value = FakeResponse([])
+
+    result = WorkerManager.update(99, name="New")
+
+    assert result["id"] == -1  # sentinel value
 
 
-@pytest.mark.asyncio
-async def test_get_worker_found(monkeypatch):
-    monkeypatch.setattr(
-        "services.workerManagerService.Database.get_worker",
-        lambda worker_id: FakeResult(data=[{"id": worker_id, "name": "Test"}])
-    )
+# =========================================================
+# DELETE
+# =========================================================
+@patch("services.workerManager.Database")
+def test_delete_worker(mock_db):
 
-    result = await WorkerManagerService.get_worker(1)
-    assert result["id"] == 1
+    mock_db.delete_worker.return_value = FakeResponse([
+        {"id": 1, "name": "Alex"}
+    ])
 
+    worker = WorkerManager.delete(1)
 
-@pytest.mark.asyncio
-async def test_get_worker_not_found(monkeypatch):
-    monkeypatch.setattr(
-        "services.workerManagerService.Database.get_worker",
-        lambda worker_id: FakeResult(data=[])
-    )
-
-    result = await WorkerManagerService.get_worker(100)
-    assert result is None
+    assert worker["id"] == 1
+    mock_db.delete_worker.assert_called_once_with(1)
 
 
-@pytest.mark.asyncio
-async def test_create_worker(monkeypatch):
-    # Debe retornar que NO existe un worker con ese documento
-    monkeypatch.setattr(
-        "services.workerManagerService.Database.get_workers_by_document",
-        lambda d: FakeResult(data=[])
-    )
+# =========================================================
+# DELETE NOT FOUND
+# =========================================================
+@patch("services.workerManager.Database")
+def test_delete_worker_not_found(mock_db):
 
-    # Supabase retorna la fila creada dentro de data=[...]
-    monkeypatch.setattr(
-        "services.workerManagerService.Database.create_worker",
-        lambda payload: FakeResult(data=[{"id": 1, **payload}])
-    )
+    mock_db.delete_worker.return_value = FakeResponse([])
 
-    result = await WorkerManagerService.create_worker({
-        "name": "John",
-        "document": "123",
-        "role": 1,
-        "photo": "img",
-        "_test_bypass_validation": True
-    })
+    worker = WorkerManager.delete(7)
 
-    assert result["id"] == 1
-    assert result["name"] == "John"
-
-
-@pytest.mark.asyncio
-async def test_create_worker_duplicate(monkeypatch):
-    monkeypatch.setattr(
-        "services.workerManagerService.Database.get_workers_by_document",
-        lambda d: FakeResult(data=[{"id": 1}])
-    )
-
-    result = await WorkerManagerService.create_worker({
-        "name": "John",
-        "document": "123",
-        "role": 1,
-        "photo": "img",
-        "_test_bypass_validation": True
-    })
-
-    assert result is None
-
-
-@pytest.mark.asyncio
-async def test_update_worker(monkeypatch):
-    monkeypatch.setattr(
-        "services.workerManagerService.Database.get_worker",
-        lambda worker_id: FakeResult(data=[{"id": worker_id}])
-    )
-
-    monkeypatch.setattr(
-        "services.workerManagerService.Database.update_worker",
-        lambda worker_id, payload: FakeResult(data=[{"id": worker_id, **payload}])
-    )
-
-    result = await WorkerManagerService.update_worker(1, {"name": "xx"})
-    assert result["name"] == "xx"
-
-
-@pytest.mark.asyncio
-async def test_update_worker_not_found(monkeypatch):
-    monkeypatch.setattr(
-        "services.workerManagerService.Database.get_worker",
-        lambda worker_id: FakeResult(data=[])
-    )
-
-    result = await WorkerManagerService.update_worker(1, {"name": "xx"})
-    assert result is None
-
-
-@pytest.mark.asyncio
-async def test_delete_worker(monkeypatch):
-    monkeypatch.setattr(
-        "services.workerManagerService.Database.get_worker",
-        lambda worker_id: FakeResult(data=[{"id": worker_id}])
-    )
-
-    monkeypatch.setattr(
-        "services.workerManagerService.Database.delete_worker",
-        lambda worker_id: FakeResult(data=[{"id": worker_id}])
-    )
-
-    result = await WorkerManagerService.delete_worker(1)
-    assert result == True
-
-
-@pytest.mark.asyncio
-async def test_delete_worker_not_found(monkeypatch):
-    monkeypatch.setattr(
-        "services.workerManagerService.Database.get_worker",
-        lambda worker_id: FakeResult(data=[])
-    )
-
-    result = await WorkerManagerService.delete_worker(99)
-    assert result is False
+    assert worker["id"] == 7
+    assert worker["name"] == "Null"

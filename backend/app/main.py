@@ -2,7 +2,7 @@ from core.CORS import setup_cors
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 import os
-from api import monitoringApi, adminApi, RoleApi, WorkerApi, workerManagerApi
+from api import monitoringApi, adminApi, RoleApi, WorkerApi
 
 # ------------------------------------------------------------------------------
 # Application Metadata
@@ -38,8 +38,6 @@ async def root():
     return {"message": "Welcome to the Worker Management API 🚀"}
 
 app.include_router(monitoringApi.router)
-app.include_router(workerManagerApi.router)
-
 app.include_router(adminApi.router)
 app.include_router(RoleApi.router)
 app.include_router(WorkerApi.router)
