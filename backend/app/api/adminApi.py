@@ -1,8 +1,10 @@
 from fastapi import APIRouter, status
 from pydantic import BaseModel
 import os
+from dotenv import load_dotenv
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
+load_dotenv()
 
 
 class Credentials(BaseModel):
