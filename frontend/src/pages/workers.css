@@ -163,7 +163,6 @@
 
 .table tbody td {
   padding: 6px 16px;
-  border-bottom: 1px solid #f1f5f9;
   color: #334155;
   text-align: center;
   background: #ffffff;
@@ -246,3 +245,73 @@ td.actions > div {
   margin: 16px;
   border-radius: 8px;
 }
+
+/* =========================================
+   AJUSTES ESPECÍFICOS PARA TABLA DE ROLES
+   ========================================= */
+
+/* 1. Corrección Columna ID (1ra columna) */
+.roles-table th:nth-child(1),
+.roles-table td:nth-child(1) {
+  text-align: center !important;
+  vertical-align: middle;
+  width: 80px; 
+}
+
+/* 2. Corrección Columna Color (3ra columna) */
+.roles-table th:nth-child(3),
+.roles-table td:nth-child(3) {
+  text-align: center !important;
+  vertical-align: middle;
+}
+
+/* PEGA ESTO: Corrección para que no se rompa la fila gris */
+
+/* 1. La celda DEBE comportarse como celda de tabla */
+.roles-table td:nth-child(3) {
+  display: table-cell !important; /* Forzamos que sea celda */
+  vertical-align: middle;
+  text-align: center;
+  height: 100%; /* Asegura que llene la altura */
+}
+
+/* 2. El div que está ADENTRO de la celda es el que acomoda el flex */
+.roles-table td:nth-child(3) > div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+}
+
+
+/* ==============================================
+   AJUSTES ESPECÍFICOS PARA TABLA DE TRABAJADORES
+   ============================================== */
+
+/* 1. Columna N. de Registro (1ra) */
+.workers-table th:nth-child(1),
+.workers-table td:nth-child(1) {
+  text-align: center !important;
+  width: 80px;
+}
+
+/* 2. Columna Nombre Completo (2da) - Centrada por petición (aunque usualmente van a la izquierda) */
+.workers-table th:nth-child(2),
+.workers-table td:nth-child(2) {
+  text-align: center !important;
+}
+
+/* 3. Columna Cédula / Documento (3ra) */
+.workers-table th:nth-child(3),
+.workers-table td:nth-child(3) {
+  text-align: center !important;
+}
+
+/* 4. Columna Rol Asignado (4ta) */
+.workers-table th:nth-child(4),
+.workers-table td:nth-child(4) {
+  text-align: center !important;
+}
+
