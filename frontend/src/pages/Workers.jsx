@@ -423,13 +423,16 @@ function Workers() {
 
       {/* MODALES */}
       
-      {/* ... (El resto de los modales sigue igual) ... */}
+      {/* Modal para crear trabajador - CON ROLES */}
       <WorkerModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         mode="create"
         onSubmit={handleCreateWorker}
+        roles={roles} // ← NUEVO: Pasar lista de roles
       />
+      
+      {/* Modal para ver trabajador - CON ROLES */}
       <WorkerModal
         isOpen={showViewModal}
         onClose={() => {
@@ -438,7 +441,10 @@ function Workers() {
         }}
         mode="view"
         workerData={selectedWorker}
+        roles={roles} // ← NUEVO: Pasar lista de roles
       />
+      
+      {/* Modal para editar trabajador - CON ROLES */}
       <WorkerModal
         isOpen={showEditModal}
         onClose={() => {
@@ -448,7 +454,10 @@ function Workers() {
         mode="edit"
         workerData={selectedWorker}
         onSubmit={handleUpdateWorker}
+        roles={roles} // ← NUEVO: Pasar lista de roles
       />
+      
+      {/* Modales de roles (sin cambios) */}
       <RoleModal
         isOpen={showCreateRoleModal}
         onClose={() => setShowCreateRoleModal(false)}
@@ -465,6 +474,8 @@ function Workers() {
         roleData={selectedRole}
         onSubmit={handleUpdateRole}
       />
+      
+      {/* Modales de eliminación (sin cambios) */}
       <ConfirmDeleteModal
         isOpen={showDeleteWorkerModal}
         onClose={() => {
