@@ -84,12 +84,12 @@ class WorkerManager:
 class CheckWorkerService:
 
     @staticmethod
-    def check_worker(image_base64: str) -> dict:
+    def check_worker(cc: str, photo_base64: str) -> dict:
         """
-        1. Convierte base64 → binario usando ImageUtils.
-        2. Usa ImageService para reconocer documento y uniforme.
-        3. Busca el worker en Database.
-        4. Valida identidad y uniforme.
+        1. Convierte base64 → bytes usando ImageUtils.
+        2. Busca el worker en Database.
+        3. Compara rostro con ImageService.check_face.
+        4. Valida uniforme con ImageService.check_role.
         5. Retorna {valid, message, audio}.
         """
 
@@ -97,7 +97,7 @@ class CheckWorkerService:
         # 1. Validar y convertir base64
         # --------------------------
 
-        if not image_base64 or not ImageUtils.validate_base64(image_base64):
+        if not photo_base64 or not ImageUtils.validate_base64(photo_base64):
             message = "La imagen recibida no es válida o no está en formato base64."
             return {
                 "valid": False,
@@ -105,44 +105,20 @@ class CheckWorkerService:
                 "audio": SpeechService.text_to_audio(message)
             }
 
-        # Convertir base64 → binario
-        image_bytes = ImageUtils.base64_to_binary(image_base64)
+        # Convertir base64 → bytes
+        user_img_bytes = ImageUtils.base64_to_binary(photo_base64)
 
         # --------------------------
-        # 2. Analizar imagen con IA
+        # 2. Buscar worker por CC
         # --------------------------
 
-        image_result = ImageService.check_worker_in_image(image_bytes)
+        result = Database.get_workers()
+        workers = result.get("content", [])
 
-        if not image_result:
-            message = "No se pudo procesar la imagen correctamente."
-            return {
-                "valid": False,
-                "message": message,
-                "audio": SpeechService.text_to_audio(message)
-            }
-
-        detected_doc = image_result.get("document")
-        detected_uniform = image_result.get("uniform")
-
-        # Validación mínima
-        if not detected_doc:
-            message = "No se pudo reconocer el documento del trabajador."
-            return {
-                "valid": False,
-                "message": message,
-                "audio": SpeechService.text_to_audio(message)
-            }
-
-        # --------------------------
-        # 3. Buscar trabajador en la base de datos
-        # --------------------------
-
-        workers = Database.get_worker_list().data
-        worker = next((w for w in workers if w.get("document") == detected_doc), None)
+        worker = next((w for w in workers if w.get("document") == str(cc)), None)
 
         if worker is None:
-            message = "El documento detectado no corresponde a ningún trabajador registrado."
+            message = "No existe ningún trabajador con esa cédula."
             return {
                 "valid": False,
                 "message": message,
@@ -150,15 +126,54 @@ class CheckWorkerService:
             }
 
         # --------------------------
-        # 4. Validar uniforme
+        # 3. Obtener foto del worker (base64 → bytes)
         # --------------------------
 
-        expected_uniform = worker.get("role")
+        worker_photo_b64 = worker.get("photo")
 
-        if detected_uniform != expected_uniform:
+        if not ImageUtils.validate_base64(worker_photo_b64):
+            message = "La foto almacenada del trabajador no es válida."
+            return {
+                "valid": False,
+                "message": message,
+                "audio": SpeechService.text_to_audio(message)
+            }
+
+        worker_img_bytes = ImageUtils.base64_to_binary(worker_photo_b64)
+
+        # --------------------------
+        # 4. Comparar rostro
+        # --------------------------
+
+        face_match = ImageService.check_face(
+            compared_image=user_img_bytes,
+            worker_image=worker_img_bytes
+        )
+
+        if not face_match:
+            message = "El rostro no coincide con el trabajador registrado."
+            return {
+                "valid": False,
+                "message": message,
+                "audio": SpeechService.text_to_audio(message)
+            }
+
+        # --------------------------
+        # 5. Validar uniforme según el rol
+        # --------------------------
+
+        role = worker.get("role")
+        role_color = Database.get_role_color(role)
+
+        uniform_ok = ImageService.check_role(
+            compared_image=user_img_bytes,
+            hex_color=role_color
+        )
+
+        if not uniform_ok:
             message = (
-                f"Identidad verificada pero el uniforme es incorrecto. "
-                f"El uniforme correcto debe ser: {expected_uniform}."
+                "Rostro verificado, pero el uniforme no coincide con el color "
+                f"asignado al rol ({role_color})."
             )
             return {
                 "valid": False,
@@ -167,12 +182,12 @@ class CheckWorkerService:
             }
 
         # --------------------------
-        # 5. Todo correcto
+        # 6. Todo correcto
         # --------------------------
 
         message = (
             f"Trabajador {worker.get('name')} verificado correctamente. "
-            f"Uniforme y documento coinciden."
+            "Identidad y uniforme coinciden."
         )
 
         return {
