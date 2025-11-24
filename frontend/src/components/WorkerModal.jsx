@@ -7,6 +7,7 @@ function WorkerModal({
   mode = "create", // "create", "edit", "view"
   workerData = null,
   onSubmit,
+  roles = [], // ← NUEVO: Recibir lista de roles como prop
 }) {
   const [formData, setFormData] = useState({
     name: "",
@@ -30,7 +31,7 @@ function WorkerModal({
       setFormData({
         name: workerData.name || "",
         documentId: workerData.document || "",
-        role: workerData.role || "",
+        role: workerData.role?.toString() || "", // ← Convertir a string para el select
         photo: workerData.photo || null,
       });
     }
@@ -64,7 +65,12 @@ function WorkerModal({
 
   const handleSubmit = () => {
     if (onSubmit) {
-      onSubmit(formData);
+      // Convertir role de string a number para la API
+      const submitData = {
+        ...formData,
+        role: parseInt(formData.role) // ← Convertir a número
+      };
+      onSubmit(submitData);
     }
     onClose();
   };
@@ -149,11 +155,12 @@ function WorkerModal({
                   className="role-select"
                 >
                   <option value="">Seleccionar rol</option>
-                  <option value="1">Manufacturero</option>
-                  <option value="2">Obrero</option>
-                  <option value="3">Operario de producción</option>
-                  <option value="4">Inspector de calidad</option>
-                  <option value="5">Mantenimiento</option>
+                  {/* NUEVO: Mapear roles dinámicos desde la API */}
+                  {roles.map((role) => (
+                    <option key={role.id} value={role.id.toString()}>
+                      {role.name}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
