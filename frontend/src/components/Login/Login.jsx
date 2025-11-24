@@ -59,7 +59,7 @@ const Login = () => {
     if (result.success) {
       console.log('Login exitoso', result.user);
       // Redirección después de login exitoso
-      window.location.href = '/dashboard'; // O usa navigate si estás usando React Router
+      window.location.href = '/monitoring'; // O usa navigate si estás usando React Router
     }
   };
 
