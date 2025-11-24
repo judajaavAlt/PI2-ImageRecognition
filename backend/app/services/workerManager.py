@@ -1,6 +1,8 @@
 from db.database import Database
 from services.imageService import ImageService
 from services.speechService import SpeechService
+from services.imageUtils import ImageUtils
+
 
 class WorkerManager:
     filename = "workers.json"
@@ -74,30 +76,51 @@ class WorkerManager:
                     'role': 0,
                     'photo': 'Null'}
         return worker[0]
-    
-    # ============================================================
-    # CHECK WORKER → Verificar identidad mediante imagen,
-    # validar uniforme y generar audio de respuesta
-    # ============================================================
-    @classmethod
-    def check_worker(cls, image_bytes: bytes):
+
+
+# ============================================================
+# CHECK WORKER SERVICE → Verificación de identidad por imagen
+# ============================================================
+class CheckWorkerService:
+
+    @staticmethod
+    def check_worker(image_base64: str) -> dict:
         """
-        1. Usa ImageService para reconocer documento y uniforme.
-        2. Busca el worker en BDD.
-        3. Valida identidad y uniforme.
-        4. Retorna {valid, message, audio}.
+        1. Convierte base64 → binario usando ImageUtils.
+        2. Usa ImageService para reconocer documento y uniforme.
+        3. Busca el worker en Database.
+        4. Valida identidad y uniforme.
+        5. Retorna {valid, message, audio}.
         """
 
-        # 1. Analizar imagen con IA
+        # --------------------------
+        # 1. Validar y convertir base64
+        # --------------------------
+
+        if not image_base64 or not ImageUtils.validate_base64(image_base64):
+            message = "La imagen recibida no es válida o no está en formato base64."
+            return {
+                "valid": False,
+                "message": message,
+                "audio": SpeechService.text_to_audio(message)
+            }
+
+        # Convertir base64 → binario
+        image_bytes = ImageUtils.base64_to_binary(image_base64)
+
+        # --------------------------
+        # 2. Analizar imagen con IA
+        # --------------------------
+
         image_result = ImageService.check_worker_in_image(image_bytes)
-        """
-        Se espera que image_result retorne algo como:
-        {
-            "document": "1032456789",
-            "uniform": 2,
-            "confidence": 0.94
-        }
-        """
+
+        if not image_result:
+            message = "No se pudo procesar la imagen correctamente."
+            return {
+                "valid": False,
+                "message": message,
+                "audio": SpeechService.text_to_audio(message)
+            }
 
         detected_doc = image_result.get("document")
         detected_uniform = image_result.get("uniform")
@@ -111,25 +134,31 @@ class WorkerManager:
                 "audio": SpeechService.text_to_audio(message)
             }
 
-        # 2. Buscar trabajador en la base de datos
+        # --------------------------
+        # 3. Buscar trabajador en la base de datos
+        # --------------------------
+
         workers = Database.get_worker_list().data
-        worker = next((w for w in workers if w["document"] == detected_doc), None)
+        worker = next((w for w in workers if w.get("document") == detected_doc), None)
 
         if worker is None:
-            message = (
-                "El documento detectado no corresponde a ningún trabajador registrado."
-            )
+            message = "El documento detectado no corresponde a ningún trabajador registrado."
             return {
                 "valid": False,
                 "message": message,
                 "audio": SpeechService.text_to_audio(message)
             }
 
-        # 3. Validar uniforme
-        if worker["role"] != detected_uniform:
+        # --------------------------
+        # 4. Validar uniforme
+        # --------------------------
+
+        expected_uniform = worker.get("role")
+
+        if detected_uniform != expected_uniform:
             message = (
                 f"Identidad verificada pero el uniforme es incorrecto. "
-                f"El uniforme correcto debe ser: {worker['role']}."
+                f"El uniforme correcto debe ser: {expected_uniform}."
             )
             return {
                 "valid": False,
@@ -137,11 +166,15 @@ class WorkerManager:
                 "audio": SpeechService.text_to_audio(message)
             }
 
-        # 4. Todo correcto
+        # --------------------------
+        # 5. Todo correcto
+        # --------------------------
+
         message = (
-            f"Trabajador {worker['name']} verificado correctamente. "
+            f"Trabajador {worker.get('name')} verificado correctamente. "
             f"Uniforme y documento coinciden."
         )
+
         return {
             "valid": True,
             "message": message,
