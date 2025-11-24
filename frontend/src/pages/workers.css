@@ -163,7 +163,6 @@
 
 .table tbody td {
   padding: 6px 16px;
-  border-bottom: 1px solid #f1f5f9;
   color: #334155;
   text-align: center;
   background: #ffffff;
@@ -266,14 +265,24 @@ td.actions > div {
   vertical-align: middle;
 }
 
-/* Centrar contenido flexible dentro de la celda de color */
-.roles-table td:nth-child(3) > div,
+/* PEGA ESTO: Corrección para que no se rompa la fila gris */
+
+/* 1. La celda DEBE comportarse como celda de tabla */
 .roles-table td:nth-child(3) {
+  display: table-cell !important; /* Forzamos que sea celda */
+  vertical-align: middle;
+  text-align: center;
+  height: 100%; /* Asegura que llene la altura */
+}
+
+/* 2. El div que está ADENTRO de la celda es el que acomoda el flex */
+.roles-table td:nth-child(3) > div {
   display: flex;
-  justify-content: center !important; 
+  justify-content: center;
   align-items: center;
   gap: 10px;
-  margin: 0 auto;
+  width: 100%;
+  height: 100%;
 }
 
 
@@ -305,3 +314,4 @@ td.actions > div {
 .workers-table td:nth-child(4) {
   text-align: center !important;
 }
+
