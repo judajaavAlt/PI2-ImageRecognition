@@ -1,0 +1,191 @@
+.loginContainer {
+  /* Contenedor principal con el fondo de círculos */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #F4F8FB; /* Fondo base casi blanco */
+  font-family: 'Arial', sans-serif;
+  position: relative;
+  overflow: hidden; /* Para que los círculos no se salgan del viewport */
+}
+
+/* --- Estilos para el Fondo de Círculos --- */
+/* Círculo Inferior Derecho (Color: #DDF1FF) */
+.loginContainer::before {
+  content: '';
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  bottom: -200px;
+  right: 100px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #DDF1FF, #DDF1FF);
+  transform: rotate(45deg);
+  opacity: 1;
+  pointer-events: none;
+}
+
+/* Círculo Inferior Izquierdo (Color: #F3ECD7) */
+.loginContainer::after {
+  content: '';
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  bottom: -150px;
+  left: -150px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #F3ECD7, #F3ECD7);
+  opacity: 1;
+  pointer-events: none;
+}
+
+/* Círculo Superior Derecho (Color: #D2F1D0) */
+.circleGreen {
+  position: absolute;
+  top: -300px;
+  right: 150px;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #D2F1D0, #D2F1D0);
+  opacity: 1;
+}
+
+/* Círculo Superior Izquierdo (Color: #DDF1FF) */
+.circleOrange {
+  position: absolute;
+  top: -300px;
+  left: -40px;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #DDF1FF, #DDF1FF);
+  opacity: 1;
+}
+
+/* --- Estilos del Formulario --- */
+
+.loginForm {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 350px;
+  text-align: center;
+  z-index: 10;
+}
+
+.title {
+  color: #333;
+  margin-bottom: 0.25rem;
+  font-size: 2rem;
+  font-weight: 300;
+  font-style: italic;
+}
+
+.subtitle {
+  color: #555;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 5px;
+}
+
+.subtitle::after {
+  content: '';
+  display: block;
+  width: 50%;
+  height: 2px;
+  background-color: #ffc107;
+  margin: 0.5rem auto 0;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #555;
+  font-weight: normal;
+  font-size: 0.9rem;
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.inputError {
+  border-color: #dc3545;
+}
+
+.errorMessage {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.submitButton {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.submitButton:hover:not(:disabled) {
+  background-color: #357bd7;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.submitButton:disabled {
+  background-color: #9cbce7;
+  cursor: not-allowed;
+}
+
+.loading {
+  opacity: 0.8;
+}
+
+.buttonIcon {
+  margin-right: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.separator {
+  display: none;
+}
+
+.credentialsInfo,
+.credentialsTitle,
+.credentialsText,
+.fillCredentialsBtn {
+  display: none;
+}
