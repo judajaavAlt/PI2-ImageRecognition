@@ -5,7 +5,7 @@ from services.imageUtils import ImageUtils
 
 
 class WorkerManager:
-    filename = "workers.json"
+
 
     # ============================================================
     # CREATE → Crear un trabajador con validación de duplicados

@@ -10,3 +10,4 @@ supabase
 opencv-python
 numpy
 scikit-image
+requests
