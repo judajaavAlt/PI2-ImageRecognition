@@ -246,3 +246,62 @@ td.actions > div {
   margin: 16px;
   border-radius: 8px;
 }
+
+/* =========================================
+   AJUSTES ESPECÍFICOS PARA TABLA DE ROLES
+   ========================================= */
+
+/* 1. Corrección Columna ID (1ra columna) */
+.roles-table th:nth-child(1),
+.roles-table td:nth-child(1) {
+  text-align: center !important;
+  vertical-align: middle;
+  width: 80px; 
+}
+
+/* 2. Corrección Columna Color (3ra columna) */
+.roles-table th:nth-child(3),
+.roles-table td:nth-child(3) {
+  text-align: center !important;
+  vertical-align: middle;
+}
+
+/* Centrar contenido flexible dentro de la celda de color */
+.roles-table td:nth-child(3) > div,
+.roles-table td:nth-child(3) {
+  display: flex;
+  justify-content: center !important; 
+  align-items: center;
+  gap: 10px;
+  margin: 0 auto;
+}
+
+
+/* ==============================================
+   AJUSTES ESPECÍFICOS PARA TABLA DE TRABAJADORES
+   ============================================== */
+
+/* 1. Columna N. de Registro (1ra) */
+.workers-table th:nth-child(1),
+.workers-table td:nth-child(1) {
+  text-align: center !important;
+  width: 80px;
+}
+
+/* 2. Columna Nombre Completo (2da) - Centrada por petición (aunque usualmente van a la izquierda) */
+.workers-table th:nth-child(2),
+.workers-table td:nth-child(2) {
+  text-align: center !important;
+}
+
+/* 3. Columna Cédula / Documento (3ra) */
+.workers-table th:nth-child(3),
+.workers-table td:nth-child(3) {
+  text-align: center !important;
+}
+
+/* 4. Columna Rol Asignado (4ta) */
+.workers-table th:nth-child(4),
+.workers-table td:nth-child(4) {
+  text-align: center !important;
+}

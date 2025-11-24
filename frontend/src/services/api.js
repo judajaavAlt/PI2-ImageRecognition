@@ -48,9 +48,7 @@ export const workersApi = {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error("Error response:", errorData);
-      console.error("Error detail:", JSON.stringify(errorData.detail, null, 2));
-
-      // Si detail es un array de errores de validación
+      
       if (Array.isArray(errorData.detail)) {
         const errorMessages = errorData.detail
           .map((err) => `${err.loc ? err.loc.join(".") : "Campo"}: ${err.msg}`)
@@ -98,6 +96,90 @@ export const workersApi = {
       const errorData = await response.json().catch(() => ({}));
       console.error("Error response:", errorData);
       throw new Error(errorData.detail || "Error al eliminar trabajador");
+    }
+    return response.json();
+  },
+};
+
+// ============================================================
+// ROLES API
+// ============================================================
+
+export const rolesApi = {
+  // Obtener todos los roles
+  getAll: async () => {
+    const response = await fetch(`${API_URL}/roles/`);
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || "Error al obtener roles");
+    }
+    return response.json();
+  },
+
+  // Obtener un rol por ID
+  getById: async (id) => {
+    const response = await fetch(`${API_URL}/roles/${id}`);
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || "Error al obtener rol");
+    }
+    return response.json();
+  },
+
+  // Crear un nuevo rol
+  // Según tu backend Python: class RoleCreate(BaseModel): name: str, color: str
+  create: async (roleData) => {
+    const payload = {
+      name: roleData.name,
+      color: roleData.color,
+    };
+
+    const response = await fetch(`${API_URL}/roles/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || "Error al crear rol");
+    }
+    return response.json();
+  },
+
+  // Actualizar un rol
+  update: async (id, roleData) => {
+    const payload = {
+      name: roleData.name,
+      color: roleData.color,
+    };
+
+    const response = await fetch(`${API_URL}/roles/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || "Error al actualizar rol");
+    }
+    return response.json();
+  },
+
+  // Eliminar un rol
+  delete: async (id) => {
+    const response = await fetch(`${API_URL}/roles/${id}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || "Error al eliminar rol");
     }
     return response.json();
   },

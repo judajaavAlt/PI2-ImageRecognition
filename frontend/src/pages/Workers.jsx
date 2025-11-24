@@ -1,34 +1,46 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import WorkerItem from "../components/WorkerItem";
 import WorkerModal from "../components/WorkerModal";
 import RoleItem from "../components/RoleItem";
 import RoleModal from "../components/RoleModal";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 import Notification from "../components/Notification";
-import { workersApi } from "../services/api";
+// IMPORTANTE: Importamos ambas APIs
+import { workersApi, rolesApi } from "../services/api";
 import "./workers.css";
 
 function Workers() {
   const [activeTab, setActiveTab] = useState("workers");
+  
+  // Modales de Trabajadores
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedWorker, setSelectedWorker] = useState(null);
+  
+  // Modales de Roles
   const [showCreateRoleModal, setShowCreateRoleModal] = useState(false);
   const [showEditRoleModal, setShowEditRoleModal] = useState(false);
   const [selectedRole, setSelectedRole] = useState(null);
+  
+  // Modales de Eliminación
   const [showDeleteWorkerModal, setShowDeleteWorkerModal] = useState(false);
   const [workerToDelete, setWorkerToDelete] = useState(null);
   const [showDeleteRoleModal, setShowDeleteRoleModal] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState(null);
+
+  // Estado general
   const [notification, setNotification] = useState(null);
   const [isClosingNotification, setIsClosingNotification] = useState(false);
+  
+  // Datos
   const [workers, setWorkers] = useState([]);
+  const [roles, setRoles] = useState([]); // Estado para los roles dinámicos
   const [loading, setLoading] = useState(true);
 
-  // Cargar trabajadores al montar el componente
+  // Cargar datos al montar el componente
   useEffect(() => {
-    loadWorkers();
+    loadData();
   }, []);
 
   useEffect(() => {
@@ -40,21 +52,48 @@ function Workers() {
     }
   }, [notification]);
 
-  const loadWorkers = async () => {
+  // Función para cargar AMBOS: trabajadores y roles
+  const loadData = async () => {
     try {
       setLoading(true);
-      const data = await workersApi.getAll();
-      setWorkers(data);
+      // Ejecutamos ambas peticiones en paralelo para mayor velocidad
+      const [workersData, rolesData] = await Promise.all([
+        workersApi.getAll(),
+        rolesApi.getAll(),
+      ]);
+      
+      setWorkers(workersData);
+      setRoles(rolesData);
     } catch (error) {
       showNotification(
         "❌",
         "Error",
-        "No se pudieron cargar los trabajadores",
+        "No se pudieron cargar los datos del sistema",
         "error"
       );
-      console.error("Error loading workers:", error);
+      console.error("Error loading data:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Función auxiliar para recargar solo trabajadores
+  const loadWorkers = async () => {
+    try {
+      const data = await workersApi.getAll();
+      setWorkers(data);
+    } catch (error) {
+      console.error("Error reloading workers:", error);
+    }
+  };
+
+  // Función auxiliar para recargar solo roles
+  const loadRoles = async () => {
+    try {
+      const data = await rolesApi.getAll();
+      setRoles(data);
+    } catch (error) {
+      console.error("Error reloading roles:", error);
     }
   };
 
@@ -70,22 +109,14 @@ function Workers() {
     setNotification({ icon, title, content, type });
   };
 
-  const rolesData = useMemo(
-    () => [
-      { id: 1, name: "Manufacturero", color: "#fcba03" },
-      { id: 2, name: "Obrero", color: "#3d7462" },
-      { id: 3, name: "Operario de producción", color: "#e85a4f" },
-      { id: 4, name: "Inspector de calidad", color: "#2b8bc3" },
-      { id: 5, name: "Mantenimiento", color: "#d2f1d0" },
-    ],
-    []
-  );
-
-  // Función helper para obtener el nombre del rol por ID
+  // Función helper para obtener el nombre del rol usando la lista de roles cargada de la API
   const getRoleName = (roleId) => {
-    const role = rolesData.find((r) => r.id === parseInt(roleId));
-    return role ? role.name : "Sin rol";
+    // Convertimos a int porque a veces viene como string desde el form
+    const role = roles.find((r) => r.id === parseInt(roleId));
+    return role ? role.name : "Sin rol asignado";
   };
+
+  // --- HANDLERS TRABAJADORES ---
 
   const handleView = (row) => {
     setSelectedWorker(row);
@@ -108,8 +139,8 @@ function Workers() {
       showNotification(
         "🗑️",
         "Trabajador eliminado",
-        `El trabajador ${workerToDelete.name} ha sido eliminado del registro exitosamente`,
-        "error"
+        `El trabajador ${workerToDelete.name} ha sido eliminado exitosamente`,
+        "success" 
       );
       setShowDeleteWorkerModal(false);
       setWorkerToDelete(null);
@@ -127,7 +158,6 @@ function Workers() {
 
   const handleCreateWorker = async (formData) => {
     try {
-      console.log("Sending worker data:", formData);
       await workersApi.create(formData);
       showNotification(
         "✅",
@@ -171,6 +201,8 @@ function Workers() {
     }
   };
 
+  // --- HANDLERS ROLES ---
+
   const handleEditRole = (role) => {
     setSelectedRole(role);
     setShowEditRoleModal(true);
@@ -181,25 +213,78 @@ function Workers() {
     setShowDeleteRoleModal(true);
   };
 
-  const confirmDeleteRole = () => {
-    // eslint-disable-next-line no-alert
-    alert(`Rol eliminado: ${roleToDelete.name}`);
-    console.log("Rol eliminado:", roleToDelete);
-    // Aquí iría la llamada a la API para eliminar el rol
+  const confirmDeleteRole = async () => {
+    try {
+      await rolesApi.delete(roleToDelete.id);
+      
+      showNotification(
+        "🗑️",
+        "Rol eliminado",
+        `El rol ${roleToDelete.name} ha sido eliminado correctamente`,
+        "success" 
+      );
+      setShowDeleteRoleModal(false);
+      setRoleToDelete(null);
+      // Recargamos roles y trabajadores (por si un trabajador tenía ese rol)
+      await loadData();
+    } catch (error) {
+      showNotification(
+        "❌",
+        "Error",
+        "No se pudo eliminar el rol (verifique que no esté en uso)",
+        "error"
+      );
+      console.error("Error deleting role:", error);
+    }
   };
 
-  const handleCreateRole = (formData) => {
-    // eslint-disable-next-line no-alert
-    alert(`Rol creado: ${formData.name}`);
-    console.log("Datos del nuevo rol:", formData);
-    // Aquí iría la llamada a la API para crear el rol
+  const handleCreateRole = async (formData) => {
+    try {
+      // formData debe tener { name, color }
+      await rolesApi.create(formData);
+      
+      showNotification(
+        "✅",
+        "Rol creado",
+        `El rol ${formData.name} ha sido creado exitosamente`,
+        "success"
+      );
+      setShowCreateRoleModal(false);
+      await loadRoles();
+    } catch (error) {
+      showNotification(
+        "❌",
+        "Error",
+        error.message || "No se pudo crear el rol",
+        "error"
+      );
+      console.error("Error creating role:", error);
+    }
   };
 
-  const handleUpdateRole = (formData) => {
-    // eslint-disable-next-line no-alert
-    alert(`Rol actualizado: ${formData.name}`);
-    console.log("Datos actualizados del rol:", formData);
-    // Aquí iría la llamada a la API para actualizar el rol
+  const handleUpdateRole = async (formData) => {
+    try {
+      await rolesApi.update(selectedRole.id, formData);
+      
+      showNotification(
+        "✏️",
+        "Rol actualizado",
+        `El rol ${formData.name} ha sido actualizado exitosamente`,
+        "success"
+      );
+      setShowEditRoleModal(false);
+      setSelectedRole(null);
+      // Recargar todo para actualizar colores/nombres en la tabla de trabajadores también
+      await loadData();
+    } catch (error) {
+      showNotification(
+        "❌",
+        "Error",
+        "No se pudo actualizar el rol",
+        "error"
+      );
+      console.error("Error updating role:", error);
+    }
   };
 
   return (
@@ -257,19 +342,16 @@ function Workers() {
               </button>
             )}
           </div>
+          
+          {/* Renderizado Condicional */}
           {activeTab === "workers" ? (
             loading ? (
-              <div
-                style={{
-                  padding: "40px",
-                  textAlign: "center",
-                  color: "#64748b",
-                }}
-              >
-                Cargando trabajadores...
+              <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>
+                Cargando datos...
               </div>
             ) : (
-              <table className="table">
+              // AGREGAMOS CLASE "workers-table" AQUÍ 👇
+              <table className="table workers-table">
                 <thead>
                   <tr>
                     <th>N. de registro</th>
@@ -282,14 +364,7 @@ function Workers() {
                 <tbody>
                   {workers.length === 0 ? (
                     <tr>
-                      <td
-                        colSpan="5"
-                        style={{
-                          padding: "40px",
-                          textAlign: "center",
-                          color: "#64748b",
-                        }}
-                      >
+                      <td colSpan="5" style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>
                         No hay trabajadores registrados
                       </td>
                     </tr>
@@ -300,7 +375,7 @@ function Workers() {
                         index={idx + 1}
                         name={worker.name}
                         documentId={worker.document}
-                        role={getRoleName(worker.role)}
+                        role={getRoleName(worker.role)} // Usamos la función dinámica
                         onView={() => handleView(worker)}
                         onEdit={() => handleEdit(worker)}
                         onDelete={() => handleDelete(worker)}
@@ -311,7 +386,8 @@ function Workers() {
               </table>
             )
           ) : (
-            <table className="table">
+            // TABLA DE ROLES
+            <table className="table roles-table">
               <thead>
                 <tr>
                   <th>ID</th>
@@ -321,29 +397,39 @@ function Workers() {
                 </tr>
               </thead>
               <tbody>
-                {rolesData.map((role) => (
-                  <RoleItem
-                    key={role.id}
-                    id={role.id}
-                    name={role.name}
-                    color={role.color}
-                    onEdit={() => handleEditRole(role)}
-                    onDelete={() => handleDeleteRole(role)}
-                  />
-                ))}
+                {roles.length === 0 ? (
+                   <tr>
+                      <td colSpan="4" style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>
+                        {loading ? "Cargando roles..." : "No hay roles registrados"}
+                      </td>
+                    </tr>
+                ) : (
+                  roles.map((role) => (
+                    <RoleItem
+                      key={role.id}
+                      id={role.id}
+                      name={role.name}
+                      color={role.color}
+                      onEdit={() => handleEditRole(role)}
+                      onDelete={() => handleDeleteRole(role)}
+                    />
+                  ))
+                )}
               </tbody>
             </table>
           )}
         </div>
       </div>
 
+      {/* MODALES */}
+      
+      {/* ... (El resto de los modales sigue igual) ... */}
       <WorkerModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         mode="create"
         onSubmit={handleCreateWorker}
       />
-
       <WorkerModal
         isOpen={showViewModal}
         onClose={() => {
@@ -353,7 +439,6 @@ function Workers() {
         mode="view"
         workerData={selectedWorker}
       />
-
       <WorkerModal
         isOpen={showEditModal}
         onClose={() => {
@@ -364,14 +449,12 @@ function Workers() {
         workerData={selectedWorker}
         onSubmit={handleUpdateWorker}
       />
-
       <RoleModal
         isOpen={showCreateRoleModal}
         onClose={() => setShowCreateRoleModal(false)}
         mode="create"
         onSubmit={handleCreateRole}
       />
-
       <RoleModal
         isOpen={showEditRoleModal}
         onClose={() => {
@@ -382,7 +465,6 @@ function Workers() {
         roleData={selectedRole}
         onSubmit={handleUpdateRole}
       />
-
       <ConfirmDeleteModal
         isOpen={showDeleteWorkerModal}
         onClose={() => {
@@ -393,7 +475,6 @@ function Workers() {
         itemName={workerToDelete?.name || ""}
         itemType="trabajador"
       />
-
       <ConfirmDeleteModal
         isOpen={showDeleteRoleModal}
         onClose={() => {
