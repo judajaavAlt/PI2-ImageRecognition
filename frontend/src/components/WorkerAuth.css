@@ -1,0 +1,241 @@
+* {
+  box-sizing: border-box;
+}
+
+.worker-auth-container {
+  min-height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(
+    135deg,
+    #b8d8f0 0%,
+    #e8e8e8 25%,
+    #ffffff 50%,
+    #c8e6c9 75%,
+    #a5d6a7 100%
+  );
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+}
+
+.worker-auth-container::before {
+  content: "";
+  position: absolute;
+  top: -150px;
+  left: -150px;
+  width: 400px;
+  height: 400px;
+  background: rgba(173, 216, 230, 0.3);
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.worker-auth-container::after {
+  content: "";
+  position: absolute;
+  top: -100px;
+  right: -100px;
+  width: 500px;
+  height: 500px;
+  background: rgba(144, 238, 144, 0.3);
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.auth-card {
+  background: white;
+  border-radius: 20px;
+  padding: 40px 50px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 480px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.auth-header {
+  margin-bottom: 30px;
+}
+
+.auth-title {
+  font-size: 28px;
+  font-weight: 300;
+  font-style: italic;
+  color: #333;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.auth-subtitle {
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  padding-bottom: 10px;
+  border-bottom: 3px solid #ffa726;
+  display: inline-block;
+  line-height: 1.2;
+}
+
+.photo-container {
+  margin: 30px 0;
+  position: relative;
+}
+
+.placeholder-photo,
+.camera-view,
+.captured-photo {
+  width: 100%;
+  max-width: 300px;
+  height: 300px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, #9e9e9e 0%, #757575 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.user-silhouette {
+  width: 120px;
+  height: 120px;
+  opacity: 0.7;
+}
+
+.user-silhouette svg {
+  width: 100%;
+  height: 100%;
+}
+
+.video-feed {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.captured-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-label {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #757575;
+  font-weight: 400;
+}
+
+.cedula-input {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #e0e0e0;
+  background-color: #ffffff;
+  color: #333;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.cedula-input:focus {
+  outline: none;
+  border-color: #2196f3;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+.cedula-input::placeholder {
+  color: #999;
+}
+
+.take-photo-btn {
+  width: 100%;
+  padding: 15px 30px;
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+  margin-top: 20px;
+}
+
+.take-photo-btn:hover {
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+  box-shadow: 0 6px 16px rgba(33, 150, 243, 0.4);
+  transform: translateY(-2px);
+}
+
+.take-photo-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.retry-btn,
+.submit-btn {
+  flex: 1;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.retry-btn {
+  background: #E85A4F;
+  color: #ffffff;
+  border: 2px solid #ddd;
+}
+
+.retry-btn:hover {
+  background: #de2b1e;
+  border-color: #ccc;
+}
+
+.submit-btn {
+  background: #2B8BC3;
+  color: white;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.submit-btn:hover {
+  background: #107ebe;
+  box-shadow: 0 6px 16px #107ebe;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 600px) {
+  .auth-card {
+    padding: 30px 25px;
+  }
+
+  .auth-title,
+  .auth-subtitle {
+    font-size: 24px;
+  }
+
+  .placeholder-photo,
+  .camera-view,
+  .captured-photo {
+    max-width: 250px;
+    height: 250px;
+  }
+}
