@@ -18,48 +18,50 @@ IMAGE_PATHS = {
 # ===========================
 
 def test_check_worker_all_correct():
+    """Rostro y uniforme correctos → debe pasar"""
     with open(IMAGE_PATHS["correct"], "rb") as f:
         image_bytes = f.read()
     photo_base64 = ImageUtils.binary_to_base64(image_bytes)
     cc = "1109485904"
 
     result = CheckWorkerService.check_worker(cc, photo_base64)
+    print("DEBUG:", result["message"])
     assert result["valid"] is True
-    print(result["message"])
 
 
 def test_check_worker_all_wrong():
+    """Rostro y uniforme incorrectos → debe fallar"""
     with open(IMAGE_PATHS["wrong_face"], "rb") as f:
         image_bytes = f.read()
     photo_base64 = ImageUtils.binary_to_base64(image_bytes)
     cc = "1109485904"
 
     result = CheckWorkerService.check_worker(cc, photo_base64)
+    print("DEBUG:", result["message"])
     assert result["valid"] is False
-    print(result["message"])
 
 
 def test_check_worker_only_face():
+    """Rostro correcto pero uniforme incorrecto → debe fallar"""
     with open(IMAGE_PATHS["correct"], "rb") as f:
         image_bytes = f.read()
     photo_base64 = ImageUtils.binary_to_base64(image_bytes)
     cc = "1109485904"
 
-    # Para simular: rostro correcto pero uniforme incorrecto
-    # Asegurarse que el color del rol del worker en la DB no coincida con la imagen
+    # Asegurarse que el color del rol en la DB no coincida con la imagen
     result = CheckWorkerService.check_worker(cc, photo_base64)
-    assert result["valid"] is False  # Porque uniforme no coincide
-    print(result["message"])
+    print("DEBUG:", result["message"])
+    assert result["valid"] is False
 
 
 def test_check_worker_only_uniform():
+    """Rostro incorrecto pero uniforme correcto → debe fallar"""
     with open(IMAGE_PATHS["wrong_face"], "rb") as f:
         image_bytes = f.read()
     photo_base64 = ImageUtils.binary_to_base64(image_bytes)
     cc = "1109485904"
 
-    # Para simular: rostro incorrecto pero uniforme correcto
-    # Asegurarse que el color del rol del worker en la DB coincida con la imagen
+    # Asegurarse que el color del rol en la DB coincida con la imagen
     result = CheckWorkerService.check_worker(cc, photo_base64)
-    assert result["valid"] is False  # Porque rostro no coincide
-    print(result["message"])
+    print("DEBUG:", result["message"])
+    assert result["valid"] is False
