@@ -1,11 +1,15 @@
 import { useState, useRef } from "react";
 import "./WorkerAuth.css";
+import { workersApi } from "../services/api";
+import Notification from "./Notification";
 
 const WorkerAuth = () => {
   const [image, setImage] = useState(null);
   const [stream, setStream] = useState(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [cedula, setCedula] = useState("");
+  const [notification, setNotification] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
 
@@ -66,6 +70,67 @@ const WorkerAuth = () => {
       capturePhoto();
     } else {
       startCamera();
+    }
+  };
+
+  const handleAuthenticate = async () => {
+    // Validaciones
+    if (!cedula || cedula.trim() === "") {
+      setNotification({
+        type: "error",
+        title: "Error",
+        message: "Por favor ingrese su número de cédula",
+      });
+      return;
+    }
+
+    if (!image) {
+      setNotification({
+        type: "error",
+        title: "Error",
+        message: "Por favor capture su foto",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    setNotification(null);
+
+    try {
+      // Extraer solo la parte base64 (sin el prefijo data:image/jpeg;base64,)
+      const base64Image = image.split(",")[1] || image;
+
+      const result = await workersApi.verify(cedula, base64Image);
+
+      if (result.match) {
+        setNotification({
+          type: "success",
+          title: "Autenticación exitosa",
+          message: result.message || "Usuario autenticado correctamente",
+        });
+
+        // Limpiar formulario después de 2 segundos
+        setTimeout(() => {
+          setImage(null);
+          setCedula("");
+          setNotification(null);
+        }, 3000);
+      } else {
+        setNotification({
+          type: "error",
+          title: "Autenticación fallida",
+          message: result.message || "No se pudo autenticar al usuario",
+        });
+      }
+    } catch (error) {
+      console.error("Error al autenticar:", error);
+      setNotification({
+        type: "error",
+        title: "Error",
+        message: error.message || "Error al comunicarse con el servidor",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -170,13 +235,33 @@ const WorkerAuth = () => {
 
         {image && (
           <div className="action-buttons">
-            <button className="retry-btn" onClick={retakePhoto}>
+            <button
+              className="retry-btn"
+              onClick={retakePhoto}
+              disabled={isLoading}
+            >
               Retomar foto
             </button>
-            <button className="submit-btn">Autenticar</button>
+            <button
+              className="submit-btn"
+              onClick={handleAuthenticate}
+              disabled={isLoading}
+            >
+              {isLoading ? "Verificando..." : "Autenticar"}
+            </button>
           </div>
         )}
       </div>
+
+      {notification && (
+        <Notification
+          icon={notification.type === "success" ? "✓" : "✕"}
+          title={notification.title}
+          content={notification.message}
+          onClose={() => setNotification(null)}
+          className={notification.type}
+        />
+      )}
 
       <canvas ref={canvasRef} style={{ display: "none" }} />
     </div>
