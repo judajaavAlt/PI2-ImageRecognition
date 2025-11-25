@@ -1,7 +1,41 @@
-#root {
-  width: 100%;
+/* ============================================== */
+/* Ajustes Globales de Altura            */
+/* ============================================== */
+html, body {
+  /* Eliminar márgenes y paddings por defecto */
   margin: 0;
   padding: 0;
+  
+  /* Esto es crucial: asegura que la altura sea 100% del viewport */
+  height: 100%; 
+  width: 100%;
+}
+
+#root {
+  /* Eliminamos las restricciones de ancho y padding de #root para permitir 
+     que el componente Login ocupe toda la ventana (100% width, 100% height). */
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  
+  /* Mantenemos el text-align si es necesario globalmente, pero 
+     el resto de estilos de la HomePage se aplicarán a un contenedor específico. */
+  text-align: center;
+}
+
+/* ============================================== */
+/* Estilos Originales de HomePage          */
+/* ============================================== */
+
+/* NOTA: Para que HomePage se vea como antes, debes envolver su contenido 
+   en un div con la clase 'homePageContainer' en App.jsx. */
+
+.homePageContainer {
+  /* Aquí aplicamos las restricciones de ancho y centrado que antes tenía #root */
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
   text-align: center;
 }
 

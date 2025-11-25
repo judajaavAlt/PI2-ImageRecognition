@@ -58,7 +58,7 @@ class ImageService:
     @classmethod
     def check_role(
         cls, compared_image: bytes, hex_color: str, *,
-        tolerance: int = 25,
+        tolerance: int = 80,
         match_threshold: float = 0.15
     ) -> bool:
         """

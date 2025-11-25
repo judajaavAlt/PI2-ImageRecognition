@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status
 from pydantic import BaseModel
-from services.debug import RoleManager
+from services.roleManager import RoleManager
 
 router = APIRouter(prefix="/roles", tags=["Role managing"])
 

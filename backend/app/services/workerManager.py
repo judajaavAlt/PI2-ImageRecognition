@@ -1,8 +1,11 @@
 from db.database import Database
+from services.imageService import ImageService
+from services.speechService import SpeechService
+from services.imageUtils import ImageUtils
 
 
 class WorkerManager:
-    filename = "workers.json"
+
 
     # ============================================================
     # CREATE → Crear un trabajador con validación de duplicados
@@ -73,3 +76,56 @@ class WorkerManager:
                     'role': 0,
                     'photo': 'Null'}
         return worker[0]
+
+
+# ============================================================
+# CHECK WORKER SERVICE → Verificación de identidad por imagen
+# ============================================================
+class CheckWorkerService:
+
+    @staticmethod
+    def check_worker(cc: str, photo_base64: str) -> dict:
+        if not photo_base64 or not ImageUtils.validate_base64(photo_base64):
+            message = "La imagen recibida no es válida o no está en formato base64."
+            return {"valid": False, "message": message, "audio": SpeechService.text_to_audio(message)}
+
+        user_img_bytes = ImageUtils.base64_to_binary(photo_base64)
+
+        # Obtener worker por documento
+        result = Database.get_workers_by_document(cc)
+        workers = result.data if hasattr(result, "data") else result.get("data", [])
+        if not workers:
+            message = "No existe ningún trabajador con esa cédula."
+            return {"valid": False, "message": message, "audio": SpeechService.text_to_audio(message)}
+
+        worker = workers[0]
+
+        # Validar foto del worker
+        worker_photo_b64 = worker.get("photo", "")
+        if not ImageUtils.validate_base64(worker_photo_b64):
+            message = "La foto almacenada del trabajador no es válida."
+            return {"valid": False, "message": message, "audio": SpeechService.text_to_audio(message)}
+        worker_img_bytes = ImageUtils.base64_to_binary(worker_photo_b64)
+
+        # Comparar rostro
+        face_match = ImageService.check_face(compared_image=user_img_bytes, worker_image=worker_img_bytes)
+        if not face_match:
+            message = "El rostro no coincide con el trabajador registrado."
+            return {"valid": False, "message": message, "audio": SpeechService.text_to_audio(message)}
+
+        # Validar uniforme según rol
+        role_id = worker.get("role")
+        role_result = Database.get_role(role_id)
+        role_data = role_result.data[0] if hasattr(role_result, "data") and role_result.data else {}
+        role_color = role_data.get("color", "#000000")
+
+        uniform_ok = ImageService.check_role(compared_image=user_img_bytes, hex_color=role_color)
+        if not uniform_ok:
+            message = (f"Rostro verificado, pero el uniforme no coincide con el color "
+                       f"asignado al rol ({role_color}).")
+            return {"valid": False, "message": message, "audio": SpeechService.text_to_audio(message)}
+
+        # Todo correcto
+        message = (f"Trabajador {worker.get('name')} verificado correctamente. "
+                   "Identidad y uniforme coinciden.")
+        return {"valid": True, "message": message, "audio": SpeechService.text_to_audio(message)}

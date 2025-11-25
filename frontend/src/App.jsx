@@ -1,39 +1,79 @@
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import "./App.css";
-import AuthPage from "./pages/AuthPage";
+import React from 'react';
+import './App.css'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './hooks/useAuth';
+import Login from './components/Login/Login';
+import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
+// Importa tus otros componentes aquí
+
+// Componente para rutas públicas
+const PublicRoute = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  return !isAuthenticated ? children : <Navigate to="/monitoring" replace />;
+};
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/auth" element={<AuthPage />} />
+        {/* Ruta raíz */}
+        <Route path="/" element={<Navigate to="/admin" replace />} />
+        
+        {/* Login - solo público */}
+        <Route 
+          path="/admin" 
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          } 
+        />
+        
+        {/* Rutas PROTEGIDAS */}
+        <Route 
+          path="/monitoring" 
+          element={
+            <ProtectedRoute>
+              {/* Aquí va tu componente Monitoring */}
+              <div>Página de Monitoring</div>
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
+          path="/health" 
+          element={
+            <ProtectedRoute>
+              {/* Aquí va tu componente Health */}
+              <div>Página de Health</div>
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
+          path="/info" 
+          element={
+            <ProtectedRoute>
+              {/* Aquí va tu componente Info */}
+              <div>Página de Info</div>
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
+          path="/services/health" 
+          element={
+            <ProtectedRoute>
+              {/* Aquí va tu componente ServicesHealth */}
+              <div>Página de Services Health</div>
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Ruta 404 */}
+        <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
     </Router>
-  );
-}
-
-function Home() {
-  return (
-    <div style={{ textAlign: "center", padding: "50px" }}>
-      <h1>Bienvenido al Sistema de Reconocimiento de Imágenes</h1>
-      <div style={{ marginTop: "30px" }}>
-        <Link
-          to="/auth"
-          style={{
-            padding: "15px 30px",
-            background: "#2196f3",
-            color: "white",
-            textDecoration: "none",
-            borderRadius: "8px",
-            fontSize: "16px",
-            fontWeight: "500",
-          }}
-        >
-          Ir a Autenticación
-        </Link>
-      </div>
-    </div>
   );
 }
 
