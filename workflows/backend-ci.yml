@@ -31,7 +31,16 @@ jobs:
           pytest --maxfail=1 --disable-warnings -q
 
       - name: Build Docker image
-        run: docker build -t judajaav/worker-backend:latest ./backend
+        run: |
+          docker build \
+            --build-arg ADMIN_USER=${{ secrets.ADMIN_USER }} \
+            --build-arg ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }} \
+            --build-arg SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
+            --build-arg SUPABASE_KEY=${{ secrets.SUPABASE_KEY }} \
+            --build-arg AZURE_KEY=${{ secrets.AZURE_KEY }} \
+            --build-arg AZURE_URL=${{ secrets.AZURE_URL }} \
+            -t judajaav/worker-backend:latest \
+            ./backend
 
       - name: Push to Docker Hub
         run: |
