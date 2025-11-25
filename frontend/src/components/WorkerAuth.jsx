@@ -23,6 +23,13 @@ const WorkerAuth = () => {
     }
   }, [notification]);
 
+  // Efecto para asignar el stream al video cuando esté disponible
+  useEffect(() => {
+    if (stream && videoRef.current && isCapturing) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [stream, isCapturing]);
+
   const handleCloseNotification = () => {
     setIsClosingNotification(true);
     setTimeout(() => {
@@ -78,19 +85,47 @@ const WorkerAuth = () => {
 
   const startCamera = async () => {
     try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error("Tu navegador no soporta acceso a la cámara");
+      }
+
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "user" },
       });
+
       setStream(mediaStream);
       setIsCapturing(true);
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-      }
     } catch (error) {
       console.error("Error al acceder a la cámara:", error);
-      alert(
-        "No se pudo acceder a la cámara. Por favor, verifica los permisos."
-      );
+
+      let errorMessage = "No se pudo acceder a la cámara. ";
+
+      if (
+        error.name === "NotAllowedError" ||
+        error.name === "PermissionDeniedError"
+      ) {
+        errorMessage +=
+          "Permisos denegados. Por favor, permite el acceso a la cámara en tu navegador.";
+      } else if (
+        error.name === "NotFoundError" ||
+        error.name === "DevicesNotFoundError"
+      ) {
+        errorMessage += "No se encontró ninguna cámara conectada.";
+      } else if (
+        error.name === "NotReadableError" ||
+        error.name === "TrackStartError"
+      ) {
+        errorMessage += "La cámara está siendo usada por otra aplicación.";
+      } else if (error.name === "OverconstrainedError") {
+        errorMessage +=
+          "No se encontró una cámara que cumpla con los requisitos.";
+      } else if (error.name === "TypeError") {
+        errorMessage += "Tu navegador no soporta acceso a la cámara.";
+      } else {
+        errorMessage += error.message;
+      }
+
+      alert(errorMessage);
     }
   };
 
@@ -98,6 +133,12 @@ const WorkerAuth = () => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
+
+      if (video.videoWidth === 0 || video.videoHeight === 0) {
+        alert("Error: El video no está listo. Por favor, intenta de nuevo.");
+        return;
+      }
+
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext("2d");
