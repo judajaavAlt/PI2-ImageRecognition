@@ -14,66 +14,7 @@ const PublicRoute = ({ children }) => {
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        {/* Ruta raíz */}
-        <Route path="/" element={<Navigate to="/admin" replace />} />
-        
-        {/* Login - solo público */}
-        <Route 
-          path="/admin" 
-          element={
-            <PublicRoute>
-              <Login />
-            </PublicRoute>
-          } 
-        />
-        
-        {/* Rutas PROTEGIDAS */}
-        <Route 
-          path="/monitoring" 
-          element={
-            <ProtectedRoute>
-              {/* Aquí va tu componente Monitoring */}
-              <div>Página de Monitoring</div>
-            </ProtectedRoute>
-          } 
-        />
-        
-        <Route 
-          path="/health" 
-          element={
-            <ProtectedRoute>
-              {/* Aquí va tu componente Health */}
-              <div>Página de Health</div>
-            </ProtectedRoute>
-          } 
-        />
-        
-        <Route 
-          path="/info" 
-          element={
-            <ProtectedRoute>
-              {/* Aquí va tu componente Info */}
-              <div>Página de Info</div>
-            </ProtectedRoute>
-          } 
-        />
-        
-        <Route 
-          path="/services/health" 
-          element={
-            <ProtectedRoute>
-              {/* Aquí va tu componente ServicesHealth */}
-              <div>Página de Services Health</div>
-            </ProtectedRoute>
-          } 
-        />
-
-        {/* Ruta 404 */}
-        <Route path="*" element={<Navigate to="/admin" replace />} />
-      </Routes>
-    </Router>
+    <h1>XD</h1>
   );
 }
 

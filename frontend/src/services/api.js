@@ -48,7 +48,7 @@ export const workersApi = {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error("Error response:", errorData);
-      
+
       if (Array.isArray(errorData.detail)) {
         const errorMessages = errorData.detail
           .map((err) => `${err.loc ? err.loc.join(".") : "Campo"}: ${err.msg}`)
@@ -96,6 +96,33 @@ export const workersApi = {
       const errorData = await response.json().catch(() => ({}));
       console.error("Error response:", errorData);
       throw new Error(errorData.detail || "Error al eliminar trabajador");
+    }
+    return response.json();
+  },
+
+  // Verificar autenticación de trabajador
+  verify: async (cc, photo) => {
+    const payload = {
+      cc: parseInt(cc),
+      photo: photo,
+    };
+
+    console.log("Verify payload being sent:", {
+      cc: payload.cc,
+      photoLength: photo.length,
+    });
+
+    const response = await fetch(`${API_URL}/workers/verify`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error("Error response:", errorData);
+      throw new Error(errorData.detail || "Error al verificar trabajador");
     }
     return response.json();
   },
