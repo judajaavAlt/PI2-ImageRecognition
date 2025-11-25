@@ -270,6 +270,40 @@
   transform: translateY(-2px);
 }
 
+/* Notification overlay styles */
+.notification-overlay {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  animation: slideDown 0.3s ease-out;
+}
+
+.notification-overlay.closing {
+  animation: fadeOut 0.3s ease-out forwards;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 @media (max-width: 600px) {
   .auth-card {
     padding: 30px 25px;

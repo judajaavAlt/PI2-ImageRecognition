@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import "./WorkerAuth.css";
 import { workersApi } from "../services/api";
 import Notification from "./Notification";
@@ -9,9 +9,31 @@ const WorkerAuth = () => {
   const [isCapturing, setIsCapturing] = useState(false);
   const [cedula, setCedula] = useState("");
   const [notification, setNotification] = useState(null);
+  const [isClosingNotification, setIsClosingNotification] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        handleCloseNotification();
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
+  const handleCloseNotification = () => {
+    setIsClosingNotification(true);
+    setTimeout(() => {
+      setNotification(null);
+      setIsClosingNotification(false);
+    }, 300);
+  };
+
+  const showNotification = (icon, title, content, type = "info") => {
+    setNotification({ icon, title, content, type });
+  };
 
   const handleCedulaChange = (e) => {
     const value = e.target.value;
@@ -76,20 +98,17 @@ const WorkerAuth = () => {
   const handleAuthenticate = async () => {
     // Validaciones
     if (!cedula || cedula.trim() === "") {
-      setNotification({
-        type: "error",
-        title: "Error",
-        message: "Por favor ingrese su número de cédula",
-      });
+      showNotification(
+        "❌",
+        "Error",
+        "Por favor ingrese su número de cédula",
+        "error"
+      );
       return;
     }
 
     if (!image) {
-      setNotification({
-        type: "error",
-        title: "Error",
-        message: "Por favor capture su foto",
-      });
+      showNotification("❌", "Error", "Por favor capture su foto", "error");
       return;
     }
 
@@ -102,33 +121,38 @@ const WorkerAuth = () => {
 
       const result = await workersApi.verify(cedula, base64Image);
 
-      if (result.match) {
-        setNotification({
-          type: "success",
-          title: "Autenticación exitosa",
-          message: result.message || "Usuario autenticado correctamente",
-        });
+      console.log("Resultado de verificación:", result);
+      console.log("Match value:", result.match, "Type:", typeof result.match);
 
-        // Limpiar formulario después de 2 segundos
+      if (result.match === true) {
+        showNotification(
+          "✅",
+          "Autenticación exitosa",
+          result.message || "Usuario autenticado correctamente",
+          "success"
+        );
+
+        // Limpiar formulario después de 3 segundos
         setTimeout(() => {
           setImage(null);
           setCedula("");
-          setNotification(null);
         }, 3000);
       } else {
-        setNotification({
-          type: "error",
-          title: "Autenticación fallida",
-          message: result.message || "No se pudo autenticar al usuario",
-        });
+        showNotification(
+          "❌",
+          "Autenticación fallida",
+          result.message || "No se pudo autenticar al usuario",
+          "error"
+        );
       }
     } catch (error) {
       console.error("Error al autenticar:", error);
-      setNotification({
-        type: "error",
-        title: "Error",
-        message: error.message || "Error al comunicarse con el servidor",
-      });
+      showNotification(
+        "❌",
+        "Error",
+        error.message || "Error al comunicarse con el servidor",
+        "error"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -254,13 +278,19 @@ const WorkerAuth = () => {
       </div>
 
       {notification && (
-        <Notification
-          icon={notification.type === "success" ? "✓" : "✕"}
-          title={notification.title}
-          content={notification.message}
-          onClose={() => setNotification(null)}
-          className={notification.type}
-        />
+        <div
+          className={`notification-overlay ${
+            isClosingNotification ? "closing" : ""
+          }`}
+        >
+          <Notification
+            className={notification.type}
+            icon={notification.icon}
+            title={notification.title}
+            content={notification.content}
+            onClose={handleCloseNotification}
+          />
+        </div>
       )}
 
       <canvas ref={canvasRef} style={{ display: "none" }} />
