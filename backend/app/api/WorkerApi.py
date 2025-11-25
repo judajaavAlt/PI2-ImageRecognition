@@ -1,6 +1,8 @@
 from fastapi import APIRouter, status
 from pydantic import BaseModel
 from services.workerManager import WorkerManager
+from services.speechService import SpeechService
+import base64
 
 router = APIRouter(prefix="/workers", tags=["Worker managing"])
 
@@ -83,4 +85,23 @@ async def delete_worker(id: int):
             summary="verificar un trabajador segun su c.c. y foto",
             status_code=status.HTTP_200_OK)
 async def verify_worker(data: verification):
-    return {"match": True, "message": ""}
+    try:
+        if data.cc % 2 == 0:
+            # Autenticación exitosa
+            text = "Autenticación exitosa. Bienvenido."
+            audio_bytes = SpeechService.text_to_audio(text)
+            audio_base64 = base64.b64encode(audio_bytes).decode('utf-8')
+            return {"match": True, "message": audio_base64}
+        else:
+            # Autenticación fallida
+            text = "Usuario no encontrado. Autenticación fallida."
+            audio_bytes = SpeechService.text_to_audio(text)
+            audio_base64 = base64.b64encode(audio_bytes).decode('utf-8')
+            return {"match": False, "message": audio_base64}
+    except Exception as e:
+        print(f"Error generando audio: {e}")
+        # En caso de error, retornar mensaje sin audio
+        if data.cc % 2 == 0:
+            return {"match": True, "message": ""}
+        else:
+            return {"match": False, "message": ""}

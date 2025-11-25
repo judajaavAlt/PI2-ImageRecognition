@@ -35,6 +35,39 @@ const WorkerAuth = () => {
     setNotification({ icon, title, content, type });
   };
 
+  const playAudioBase64 = (base64Audio) => {
+    try {
+      if (!base64Audio || base64Audio.trim() === "") {
+        return;
+      }
+
+      const binaryString = atob(base64Audio);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+
+      const blob = new Blob([bytes], { type: "audio/wav" });
+      const audioUrl = URL.createObjectURL(blob);
+      const audio = new Audio(audioUrl);
+
+      audio.onerror = () => {
+        URL.revokeObjectURL(audioUrl);
+      };
+
+      audio.onended = () => {
+        URL.revokeObjectURL(audioUrl);
+      };
+
+      audio.play().catch(() => {
+        URL.revokeObjectURL(audioUrl);
+      });
+    } catch (error) {
+      console.error("Error al reproducir audio:", error);
+    }
+  };
+
   const handleCedulaChange = (e) => {
     const value = e.target.value;
     // Solo permitir números
@@ -121,14 +154,16 @@ const WorkerAuth = () => {
 
       const result = await workersApi.verify(cedula, base64Image);
 
-      console.log("Resultado de verificación:", result);
-      console.log("Match value:", result.match, "Type:", typeof result.match);
+      // Reproducir audio si viene en el message
+      if (result.message) {
+        playAudioBase64(result.message);
+      }
 
       if (result.match === true) {
         showNotification(
           "✅",
           "Autenticación exitosa",
-          result.message || "Usuario autenticado correctamente",
+          "Usuario autenticado correctamente",
           "success"
         );
 
@@ -141,7 +176,7 @@ const WorkerAuth = () => {
         showNotification(
           "❌",
           "Autenticación fallida",
-          result.message || "No se pudo autenticar al usuario",
+          "No se pudo autenticar al usuario",
           "error"
         );
       }
