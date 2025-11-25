@@ -2,7 +2,7 @@
 # 🧩 Worker Management App 
 
 Aplicación para la **gestión y control de trabajadores** mediante reconocimiento facial y verificación de uniforme.  
-El sistema permite reconocer a los trabajadores **que entran, que salen** y validar **si usan el uniforme correcto**.
+El sistema permite reconocer a los trabajadores **que entran, que salen** y validar **si usan el uniforme correcto**. 
 
 
 
