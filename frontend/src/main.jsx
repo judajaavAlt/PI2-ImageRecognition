@@ -7,6 +7,7 @@ import Workers from "./pages/Workers.jsx";
 import Login from "./components/Login/Login.jsx";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute.jsx";
 import PublicRoute from "./components/PublicRoute/PublicRoute.jsx";
+import AuthPage from "./pages/AuthPage.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -24,6 +25,8 @@ createRoot(document.getElementById("root")).render(
             </PublicRoute>
           } 
         />
+        {/* Autenticación del trabajador - PÚBLICA */}
+        <Route path="/auth" element={<AuthPage />} />
         
         {/* Ruta "/monitoring" - Protegida */}
         <Route 

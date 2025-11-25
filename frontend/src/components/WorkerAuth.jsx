@@ -100,6 +100,47 @@ const WorkerAuth = () => {
                 playsInline
                 className="video-feed"
               />
+              <div className="camera-overlay">
+                <svg
+                  className="silhouette-guide"
+                  viewBox="0 0 200 300"
+                  xmlns="http://www.w3.org/2000/svg"
+                  preserveAspectRatio="xMidYMid slice"
+                >
+                  {/* Cabeza */}
+                  <ellipse
+                    cx="100"
+                    cy="95"
+                    rx="45"
+                    ry="55"
+                    fill="none"
+                    stroke="rgba(255, 255, 255, 0.7)"
+                    strokeWidth="3"
+                    strokeDasharray="8,6"
+                  />
+
+                  {/* Cuello */}
+                  <path
+                    d="M 75 140 L 75 175 L 125 175 L 125 140"
+                    fill="none"
+                    stroke="rgba(255, 255, 255, 0.7)"
+                    strokeWidth="3"
+                    strokeDasharray="8,6"
+                  />
+
+                  {/* Hombros */}
+                  <path
+                    d="M 30 300 Q 40 195, 75 175 L 125 175 Q 160 195, 170 300"
+                    fill="none"
+                    stroke="rgba(255, 255, 255, 0.7)"
+                    strokeWidth="3"
+                    strokeDasharray="8,6"
+                  />
+                </svg>
+                <p className="guide-text">
+                  Posicione su rostro dentro de la guía
+                </p>
+              </div>
             </div>
           )}
 
