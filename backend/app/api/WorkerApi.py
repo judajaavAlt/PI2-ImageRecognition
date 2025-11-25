@@ -85,6 +85,8 @@ async def delete_worker(id: int):
             summary="verificar un trabajador segun su c.c. y foto",
             status_code=status.HTTP_200_OK)
 async def verify_worker(data: verification):
+    return WorkerManager.check_worker(data.cc, data.photo)
+
     try:
         if data.cc % 2 == 0:
             # Autenticación exitosa
