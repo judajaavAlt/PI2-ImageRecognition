@@ -1,5 +1,7 @@
 FROM python:3.11-slim
 
+WORKDIR /app
+
 # Build arguments (from GitHub Actions)
 ARG ADMIN_USER
 ARG ADMIN_PASSWORD
@@ -32,4 +34,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["python", "-m", "main"]
+CMD ["sh", "-c", "cd app && uvicorn main:app --host 0.0.0.0 --port 8000"]
