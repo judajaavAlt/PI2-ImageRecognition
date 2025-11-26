@@ -1,5 +1,7 @@
 FROM python:3.11-slim
 
+WORKDIR /app
+
 # Build arguments (from GitHub Actions)
 ARG ADMIN_USER
 ARG ADMIN_PASSWORD
