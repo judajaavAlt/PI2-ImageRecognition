@@ -1,0 +1,71 @@
+name: Backend CI/CD
+
+on:
+  workflow_dispatch:
+
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  # Job 1: Full pipeline (only on push to main)
+  build-and-deploy:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+
+      - name: Run tests
+        run: |
+          cd backend
+          pytest --maxfail=1 --disable-warnings -q
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --build-arg ADMIN_USER=${{ secrets.ADMIN_USER }} \
+            --build-arg ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }} \
+            --build-arg SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
+            --build-arg SUPABASE_KEY=${{ secrets.SUPABASE_KEY }} \
+            --build-arg AZURE_KEY=${{ secrets.AZURE_KEY }} \
+            --build-arg AZURE_URL=${{ secrets.AZURE_URL }} \
+            -t judajaav/worker-backend:latest \
+            ./backend
+
+      - name: Push to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          docker push judajaav/worker-backend:latest
+
+  # Job 2: Test-only check (on pull request to develop)
+  test-on-pr:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+
+      - name: Run tests
+        run: |
+          cd backend
+          pytest --maxfail=1 --disable-warnings -q
